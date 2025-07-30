@@ -1,5 +1,14 @@
+# Ignorar el entorno virtual
 venv/
+
+# Archivos temporales de Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+
+# Archivos de Jupyter y notebooks temporales
 .ipynb_checkpoints/
-.DS_Store
+
+# Archivos de configuración del sistema operativo o editor
+.vscode/
+

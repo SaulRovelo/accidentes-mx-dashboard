@@ -1,0 +1,7 @@
+# Paquetes para el análisis de datos
+pandas==2.2.2        # Manipulación y análisis de datos en estructuras tipo DataFrame
+
+# Para ejecutar notebooks Jupyter desde el entorno virtual
+ipykernel==6.29.4    # Permite usar este entorno como kernel en Jupyter Notebooks
+
+# Para instalar dependencias: pip install -r requirements.txt
