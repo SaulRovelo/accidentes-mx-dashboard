@@ -7,4 +7,7 @@ ipykernel==6.29.4    # Permite usar este entorno como kernel en Jupyter Notebook
 # Paquetes para visualización de datos
 plotly==5.17.1        # Visualización interactiva de datos
 
+# Paquetes para la creación de aplicaciones web
+streamlit==1.28.0    # Framework para crear aplicaciones web interactivas
+
 # Para instalar dependencias: pip install -r requirements.txt
