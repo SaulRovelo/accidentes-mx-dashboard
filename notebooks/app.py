@@ -45,24 +45,17 @@ with st.sidebar.expander("🔎 Filtros interactivos", expanded=True):
                 alcaldias_seleccionadas.append(alcaldia) # Añade la alcaldía a la lista si está seleccionada
             # Checkbox: Crea una casilla de verificación para cada alcaldía
             # append: Añade un elemento a la lista
-        
 
-
-    st.divider()  # st.divider: Agrega una línea divisoria visual
 
     # checkbox para seleccionar todas las alcaldías
-    
-  
 
     # Lista de meses abreviados en orden
     meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
             "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
 
-    
-    st.markdown("### 📆 Selecciona el rango de meses:") # Muestra texto en markdown
     # Slider (deslizador) con meses
     mes_inicio, mes_fin = st.select_slider( # salida: tupla con mes de inicio y fin
-        label=" ", # texto que aparece arriba del slider
+        label="📆 Selecciona el rango de meses:", # texto que aparece arriba del slider
         options=meses, #Opciones del slider se le pasa la lista de meses
         value=("Enero", "Diciembre") #Valores iniciales seleccionados
     )

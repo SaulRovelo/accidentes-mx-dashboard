@@ -1,11 +1,11 @@
 # Paquetes para el análisis de datos
-pandas==2.2.2        # Manipulación y análisis de datos en estructuras tipo DataFrame
+pandas>=2.2.3        # Manipulación y análisis de datos en estructuras tipo DataFrame (>=2.2.3 para compatibilidad con Python 3.13)
 
 # Para ejecutar notebooks Jupyter desde el entorno virtual
 ipykernel==6.29.4    # Permite usar este entorno como kernel en Jupyter Notebooks
 
 # Paquetes para visualización de datos
-plotly==5.17.1        # Visualización interactiva de datos
+plotly>=6.0.0        # Visualización interactiva de datos (>=6.0.0 para compatibilidad con Python 3.13)
 
 # Paquetes para la creación de aplicaciones web
 streamlit==1.28.0    # Framework para crear aplicaciones web interactivas
