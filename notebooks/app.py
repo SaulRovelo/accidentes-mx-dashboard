@@ -34,7 +34,7 @@ with st.sidebar.expander("🔎 Filtros interactivos", expanded=True):
 
     alcaldias_seleccionadas = []  # Lista para almacenar las alcaldías seleccionadas
 
-    seleccionar_todas = st.checkbox("Seleccionar todas", value=False)  
+    seleccionar_todas = st.checkbox("Seleccionar todas", value=True)  
     if seleccionar_todas:
         alcaldias_seleccionadas = alcaldias
     else:
@@ -60,6 +60,23 @@ with st.sidebar.expander("🔎 Filtros interactivos", expanded=True):
         value=("Enero", "Diciembre") #Valores iniciales seleccionados
     )
 
+    # checkbox para seleccionar tipos de evento
+    st.markdown("### 🚨 Tipo de evento")
+    tipos_evento = sorted(df["tipo_evento"].dropna().unique())
+    # Creamos dos columnas para los checkboxes
+    columnas = st.columns(2)
+
+    tipo_evento_seleccionado = [] # Lista para almacenar los tipos de evento seleccionados
+    seleccionar_todos_eventos = st.checkbox("Seleccionar todos", value=True)
+    # Casilla de verificación para seleccionar todos los tipos de evento
+    if seleccionar_todos_eventos:
+        tipo_evento_seleccionado = tipos_evento
+    else: # Si no se seleccionan todos, se muestran los checkboxes individuales
+        for i, tipo_evento in enumerate(tipos_evento):
+            col = columnas[i % 2]  # Alternamos columnas usando módulo
+            if col.checkbox(tipo_evento, key=tipo_evento):
+                tipo_evento_seleccionado.append(tipo_evento)
+
 
 # ----------------------------------------------------
 # 🔹 Filtrar datos según selección
@@ -79,6 +96,10 @@ df_filtrado = df[
     (df["mes"].between(mes_inicio_num, mes_fin_num))
 ]
 
+# Creamos un DataFrame para los tipos de evento seleccionados
+df_filtrado_eventos = df[
+    (df["tipo_evento"].isin(tipo_evento_seleccionado))
+]
 
 # ----------------------------------------------------
 # 🔹 Encabezado y métricas
@@ -142,3 +163,56 @@ fig = px.bar(
 
 # Mostramos el gráfico en el dashboard ocupando todo el ancho disponible
 st.plotly_chart(fig, use_container_width=True)
+
+# ----------------------------------------------------
+# 🗺️ Mapa interactivo de accidentes geolocalizados
+# ----------------------------------------------------
+st.subheader("🗺️ Mapa de Accidentes por Coordenadas")  # st.subheader: Agrega un subtítulo visual en la app
+
+# Verificamos que existan columnas de latitud y longitud en el DataFrame filtrado
+if "latitud" in df_filtrado_eventos.columns and "longitud" in df_filtrado_eventos.columns:
+    
+    # dropna(): Elimina las filas donde 'latitud' o 'longitud' tengan valores nulos
+    df_mapa = df_filtrado_eventos.dropna(subset=["latitud", "longitud"])
+
+    # Verificamos que el DataFrame no esté vacío
+    if not df_mapa.empty:
+        # fig_mapa: Gráfico de mapa que se mostrará en la app
+        # px.scatter_mapbox(): Crea un mapa de puntos usando coordenadas
+        # lat / lon: Columnas que contienen las coordenadas
+        # hover_name: Texto principal que se muestra al pasar el cursor
+        # hover_data: Columnas adicionales que se muestran al pasar el cursor
+        # color: Columna usada para diferenciar los puntos por color
+        # zoom: Nivel inicial de acercamiento del mapa
+        # height: Altura del gráfico en píxeles
+        fig_mapa = px.scatter_mapbox(
+            df_mapa,
+            lat="latitud",
+            lon="longitud",
+            hover_name="tipo_evento",
+            hover_data=["alcaldia", "fecha_evento", "personas_lesionadas", "personas_fallecidas"],
+            color="tipo_evento",
+            zoom=10,
+            height=600
+        )
+
+        #fig_mapa: Gráfico de mapa que se mostrará en la app
+        # update_layout(): Ajusta el diseño del gráfico
+        # mapbox_style: Estilo del mapa (carto-positron es gratuito y claro)
+        # margin: Márgenes del gráfico (en píxeles)
+        # title: Título que aparece encima del mapa
+        fig_mapa.update_layout(
+            mapbox_style="carto-positron",
+            margin={"r":0, "t":30, "l":0, "b":0},
+            title="Ubicación de accidentes en CDMX"
+        )
+
+        # st.plotly_chart(): Muestra el gráfico en Streamlit
+        # use_container_width=True: Ajusta el gráfico al ancho disponible en pantalla
+        st.plotly_chart(fig_mapa, use_container_width=True)
+    else:
+        # Mensaje informativo si después de eliminar nulos no hay datos
+        st.info("No hay datos con coordenadas disponibles para los filtros seleccionados.")
+else:
+    # Advertencia si las columnas de coordenadas no existen en el DataFrame
+    st.warning("Las columnas 'latitud' y 'longitud' no están disponibles en el DataFrame.")
