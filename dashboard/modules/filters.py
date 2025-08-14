@@ -1,68 +1,47 @@
-# Módulo para construir la barra lateral (sidebar).
-# Proporciona controles para seleccionar alcaldías, rango de meses y tipos de evento.
-# Devuelve un diccionario con todos los valores seleccionados por el usuario.
+# Módulo de filtros para la barra lateral del dashboard
 
-import streamlit as st  # Framework para apps web interactivas
-from .theme import MESES, MESES_A_NUM  # Catálogos y mapeos de meses desde theme.py
+import streamlit as st  # Framework para crear la app web interactiva
+import pandas as pd     # Librería para manipulación/análisis de datos
 
-def sidebar_filters(df):
-    # sidebar_filters: Genera y muestra los filtros en el panel lateral (sidebar).
-    # df: DataFrame que contiene las columnas 'alcaldia', 'fecha_evento', 'tipo_evento'.
+def sidebar_global_filters(df: pd.DataFrame) -> dict:
+    """Panel GLOBAL: sólo controla selección de alcaldías."""
+    # df: DataFrame con columna 'alcaldia' usada para poblar la lista de opciones
+    # return: dict con la clave 'alcaldias_sel' (lista de alcaldías seleccionadas)
 
-    with st.sidebar.expander("🔎 Filtros interactivos", expanded=True):
-        # st.sidebar.expander: Crea un panel desplegable en la barra lateral.
-        # expanded=True: El panel se muestra abierto por defecto.
+    with st.sidebar.expander("🔎 Filtros globales", expanded=True):
+        # st.sidebar.expander: Crea un panel plegable en la barra lateral
+        # expanded=True: El panel se muestra abierto por defecto
 
-        st.markdown("### 🏙️ Alcaldías")
-        # sorted(...): Ordena alfabéticamente las alcaldías únicas no nulas.
-        alcaldias = sorted(df["alcaldia"].dropna().unique())
+        st.markdown("### 🏙️ Alcaldías")  # Título de sección en el panel
+        alcaldias = sorted(df["alcaldia"].dropna().unique().tolist())
+        # dropna(): Elimina valores nulos de la columna 'alcaldia'
+        # unique(): Obtiene el conjunto de alcaldías sin repetir
+        # sorted(...): Ordena alfabéticamente para facilitar la búsqueda visual
+        # tolist(): Convierte a lista de Python
 
-        cols = st.columns(2)  # Crea dos columnas para mostrar checkboxes en dos listas
-        alcaldias_sel = []  # Lista para guardar las alcaldías seleccionadas
+        seleccionar_todas = st.checkbox("Seleccionar todas", value=True, key="all_munis")
+        # st.checkbox: Casilla para seleccionar/deseleccionar todas las alcaldías
+        # value=True: Activada por defecto para incluir todo al inicio
+        # key="all_munis": Clave única del widget para mantener estado
 
-        seleccionar_todas = st.checkbox("Seleccionar todas", value=True, key="all_alc")
-        # Checkbox general para seleccionar todas las alcaldías por defecto.
         if seleccionar_todas:
             alcaldias_sel = alcaldias
+            # Si está marcada la casilla, usamos la lista completa
         else:
-            # Si no se seleccionan todas, mostrar checkboxes individuales
+            cols = st.columns(2)
+            # st.columns(2): Distribuye las opciones en dos columnas (mejor lectura)
+            alcaldias_sel = []
             for i, a in enumerate(alcaldias):
-                if cols[i % 2].checkbox(a, key=f"alc_{a}"):
+                # enumerate: Recorre la lista y nos da índice (i) y valor (a)
+                if cols[i % 2].checkbox(a, value=False, key=f"muni_{a}"):
+                    # Alternamos entre col 0 y col 1 usando módulo (%)
+                    # Creamos un checkbox por alcaldía (value=False: desmarcadas por defecto)
                     alcaldias_sel.append(a)
+                    # append: Agrega la alcaldía seleccionada a la lista final
 
-        st.divider()  # Línea divisoria visual
+        if not alcaldias_sel:
+            st.info("Selecciona al menos una alcaldía para ver datos.")
+            # Mensaje informativo si quedó vacía la selección
 
-        st.markdown("### 📆 Selecciona el rango de meses:")
-        # Slider para elegir un mes de inicio y fin
-        mes_inicio, mes_fin = st.select_slider(
-            label=" ",  # Label vacío para no duplicar el texto
-            options=MESES,  # Lista de meses (desde theme.py)
-            value=(MESES[0], MESES[-1]),  # Valor inicial: Enero a Diciembre
-            key="meses_slider"
-        )
-        # Convierte los nombres de meses a números usando el mapeo MESES_A_NUM
-        mes_inicio_num, mes_fin_num = MESES_A_NUM[mes_inicio], MESES_A_NUM[mes_fin]
-
-        st.markdown("### 🚨 Tipo de evento")
-        # Lista de tipos de evento únicos y ordenados alfabéticamente
-        tipos = sorted(df["tipo_evento"].dropna().unique())
-        cols_ev = st.columns(2)  # Muestra los tipos en dos columnas
-        tipos_sel = []  # Lista para guardar los tipos de evento seleccionados
-
-        todos_ev = st.checkbox("Seleccionar todos", value=True, key="all_ev")
-        # Checkbox general para seleccionar todos los tipos de evento
-        if todos_ev:
-            tipos_sel = tipos
-        else:
-            # Si no se seleccionan todos, mostrar checkboxes individuales
-            for i, t in enumerate(tipos):
-                if cols_ev[i % 2].checkbox(t, key=f"ev_{t}"):
-                    tipos_sel.append(t)
-
-    # Devuelve un diccionario con las selecciones hechas por el usuario
-    return {
-        "alcaldias_sel": alcaldias_sel,       # Lista de alcaldías seleccionadas
-        "mes_inicio_num": mes_inicio_num,     # Mes inicial en formato numérico
-        "mes_fin_num": mes_fin_num,           # Mes final en formato numérico
-        "tipos_evento_sel": tipos_sel,        # Lista de tipos de evento seleccionados
-    }
+    return {"alcaldias_sel": alcaldias_sel}
+    # Devuelve diccionario con la selección para que app.py lo use en el filtrado
