@@ -22,7 +22,13 @@ def load_data(path: str) -> pd.DataFrame:
     
     df["mes"] = df["fecha_evento"].dt.month
     # .dt.month: Extrae el número de mes (1=Enero, 12=Diciembre) para análisis temporal.
-    
+
+    df["hora"] = pd.to_datetime(df["hora_evento"].astype(str), format="%H:%M:%S", errors="coerce").dt.hour
+    # .dt.hour: Extrae la hora del evento para análisis temporal.
+    # .astype(str): Convierte la columna a tipo string para asegurar formato correcto.
+    # format="%H:%M:%S": Especifica el formato de la hora (horas:minutos:segundos).
+    # errors="coerce": Convierte valores no válidos a NaT (Not a Time).
+
     return df
     # Devuelve el DataFrame cargado y con la columna "mes" añadida.
 

@@ -94,6 +94,22 @@ def main():
     else:
         st.info("No hay datos de coordenadas para los filtros actuales.")
 
+
+    from modules.charts import fig_accidentes_por_hora
+
+# ===================== Tarjeta 4: Distribución por hora del día =====================
+    st.subheader("⏰ Distribución de accidentes por hora del día")
+
+    # Sin filtro local → usamos el df_global completo
+    df_c4 = df_global.copy()
+
+    # Mostrar gráfico
+    st.plotly_chart(fig_accidentes_por_hora(df_c4), use_container_width=True)
+    st.divider()
+
+
+
+
 if __name__ == "__main__":
     main()
  

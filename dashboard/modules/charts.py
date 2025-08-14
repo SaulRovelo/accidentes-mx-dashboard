@@ -119,3 +119,26 @@ def fig_mapa_incidentes(df: pd.DataFrame):
     )
 
     return fig
+
+
+
+def fig_accidentes_por_hora(df: pd.DataFrame):
+    if df.empty or "hora" not in df.columns:
+        return px.bar(title="Sin datos para mostrar", template=TEMPLATE)
+
+    tmp = df["hora"].astype(int).value_counts().reindex(range(24), fill_value=0).reset_index()
+    tmp.columns = ["hora", "accidentes"]
+
+    fig = px.bar(
+        tmp,
+        x="hora",
+        y="accidentes",
+        title=" ",
+        labels={"hora": "Hora (0–23)", "accidentes": "Número de accidentes"},
+        text="accidentes",
+        template=TEMPLATE,
+        color_discrete_sequence=[PALETA[1]],
+    )
+    fig.update_layout(xaxis=dict(dtick=1), yaxis_title="Accidentes")
+    fig.update_traces(textposition="outside")
+    return fig
