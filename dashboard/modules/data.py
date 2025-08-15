@@ -4,6 +4,7 @@
 
 import pandas as pd
 import streamlit as st
+from .theme import DIAS_SEMANA
 
 @st.cache_data(ttl=3600, show_spinner=False)
 # @st.cache_data: Guarda en caché el resultado de la función para mejorar el rendimiento.
@@ -28,6 +29,14 @@ def load_data(path: str) -> pd.DataFrame:
     # .astype(str): Convierte la columna a tipo string para asegurar formato correcto.
     # format="%H:%M:%S": Especifica el formato de la hora (horas:minutos:segundos).
     # errors="coerce": Convierte valores no válidos a NaT (Not a Time).
+
+
+    df["dia_semana_num"] = df["fecha_evento"].dt.dayofweek  # 0 = lunes
+    # .dt.dayofweek: Obtiene el día de la semana como número (0=Lunes, 6=Domingo).
+    df["dia_semana_nombre"] = df["dia_semana_num"].map({i: d for i, d in enumerate(DIAS_SEMANA)})
+    # .map(): Reemplaza números por nombres de días (0→"Lunes", ..., 6→"Domingo").
+
+
 
     return df
     # Devuelve el DataFrame cargado y con la columna "mes" añadida.

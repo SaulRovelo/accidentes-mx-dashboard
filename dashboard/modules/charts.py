@@ -123,22 +123,272 @@ def fig_mapa_incidentes(df: pd.DataFrame):
 
 
 def fig_accidentes_por_hora(df: pd.DataFrame):
+    """
+    Genera un gráfico de barras que muestra la distribución de accidentes por hora del día (0 a 23).
+
+    Parámetros
+    ----------
+    df : pd.DataFrame
+        DataFrame filtrado que debe contener una columna 'hora' con valores enteros (0 a 23).
+
+    Retorna
+    -------
+    plotly.graph_objs._figure.Figure
+        Gráfico de barras con la cantidad de accidentes por cada hora del día.
+        Si el DataFrame está vacío o no tiene la columna 'hora', se devuelve una figura vacía.
+    """
+
+    # Validación: si el DataFrame está vacío o no tiene la columna 'hora', mostrar mensaje
     if df.empty or "hora" not in df.columns:
         return px.bar(title="Sin datos para mostrar", template=TEMPLATE)
 
+    # Agrupar: contar cuántos accidentes hay por cada hora (0 a 23)
+    # .astype(int): asegura que los valores sean enteros
+    # .value_counts(): cuenta ocurrencias por hora
+    # .reindex(range(24), fill_value=0): asegura que aparezcan todas las horas (aunque algunas sean 0)
     tmp = df["hora"].astype(int).value_counts().reindex(range(24), fill_value=0).reset_index()
-    tmp.columns = ["hora", "accidentes"]
+    tmp.columns = ["hora", "accidentes"]  # renombrar columnas
 
+    # Crear gráfico de barras
     fig = px.bar(
         tmp,
         x="hora",
         y="accidentes",
-        title=" ",
+        title=" ",  # Título vacío porque se suele poner un subtítulo desde app.py
         labels={"hora": "Hora (0–23)", "accidentes": "Número de accidentes"},
-        text="accidentes",
-        template=TEMPLATE,
-        color_discrete_sequence=[PALETA[1]],
+        text="accidentes",  # muestra el valor encima de cada barra
+        template=TEMPLATE,  # aplica el estilo global del dashboard
+        color_discrete_sequence=[PALETA[1]],  # segundo color de la paleta definida en theme.py
     )
-    fig.update_layout(xaxis=dict(dtick=1), yaxis_title="Accidentes")
-    fig.update_traces(textposition="outside")
+
+    # Ajustes visuales del gráfico
+    fig.update_layout(
+        xaxis=dict(dtick=1),      # mostrar todas las horas (0–23) en el eje X
+        yaxis_title="Accidentes"  # título del eje Y
+    )
+    fig.update_traces(textposition="outside")  # mostrar los números fuera de las barras
+
     return fig
+
+
+def fig_heatmap_hora_dia(df: pd.DataFrame):
+    """
+    Genera un heatmap (mapa de calor) con el número de accidentes distribuidos
+    por hora del día (0–23) y día de la semana (Lunes–Domingo).
+
+    Parámetros
+    ----------
+    df : pd.DataFrame
+        DataFrame que debe contener las columnas 'hora' y 'dia_semana_nombre'.
+
+    Retorna
+    -------
+    plotly.graph_objs._figure.Figure
+        Figura tipo heatmap. Si no hay datos o columnas requeridas, devuelve un heatmap vacío.
+    """
+
+    # Validación: si no hay datos o faltan columnas clave, devolver heatmap vacío con aviso
+    if df.empty or not {"hora", "dia_semana_nombre"}.issubset(df.columns):
+        return px.imshow(
+            [[0]*24]*7,                   # Matriz 7x24 vacía (7 días, 24 horas)
+            x=list(range(24)),            # Eje X: horas del día (0 a 23)
+            y=DIAS_SEMANA,                # Eje Y: días de la semana ordenados
+            title="Sin datos para construir el heatmap",
+            template=TEMPLATE
+        )
+
+    # Asegura que los valores de hora estén en rango válido (0–23)
+    df["hora"] = df["hora"].astype("Int64").clip(0, 23)
+
+    # Crear tabla dinámica: filas = día, columnas = hora, valores = cuenta de accidentes
+    # aggfunc='count': cuenta cuántos registros hay por combinación día-hora
+    # fill_value=0: completa con ceros donde no hay datos
+    tabla = (
+        df.pivot_table(
+            index="dia_semana_nombre",   # filas: días
+            columns="hora",              # columnas: horas
+            values="tipo_evento",        # cuenta eventos para llenar la celda
+            aggfunc="count",
+            fill_value=0
+        )
+        .reindex(index=DIAS_SEMANA, columns=list(range(24)), fill_value=0)
+        # reindex: asegura orden correcto de días (L–D) y todas las horas (0–23)
+    )
+
+    # Crear heatmap usando px.imshow
+    fig = px.imshow(
+        tabla.values,                   # matriz de valores
+        labels=dict(
+            x="Hora del día",
+            y="Día de la semana",
+            color="Accidentes"
+        ),
+        x=tabla.columns,               # etiquetas del eje X
+        y=tabla.index,                 # etiquetas del eje Y
+        title="Heatmap: Accidentes por hora y día de la semana",
+        template=TEMPLATE,
+        color_continuous_scale="YlOrRd"  # escala de colores cálida
+    )
+
+    # Asegura que el eje X se interprete como categorías (no números continuos)
+    fig.update_xaxes(type="category")
+
+    return fig
+
+
+
+def fig_treemap_accidentes_por_alcaldia(df: pd.DataFrame):
+    """
+    Genera un treemap (diagrama de árbol) que muestra la cantidad de accidentes por alcaldía.
+
+    Parámetros
+    ----------
+    df : pd.DataFrame
+        DataFrame con una columna 'alcaldia' que identifica la ubicación del accidente.
+
+    Retorna
+    -------
+    plotly.graph_objs._figure.Figure
+        Figura tipo treemap. Si el DataFrame está vacío o le falta la columna 'alcaldia',
+        se devuelve una figura vacía con mensaje informativo.
+    """
+
+    # Validación: si no hay datos o falta la columna requerida, devuelve treemap vacío
+    if df.empty or "alcaldia" not in df.columns:
+        return px.treemap(title="Sin datos para construir el treemap", template=TEMPLATE)
+
+    # Agrupar: contar accidentes por alcaldía
+    tmp = df["alcaldia"].dropna().value_counts().reset_index()
+    # dropna(): elimina registros sin alcaldía
+    # value_counts(): cuenta cuántas veces aparece cada alcaldía
+    # reset_index(): convierte la Serie resultante en DataFrame
+
+    tmp.columns = ["alcaldia", "accidentes"]
+    # Renombrar columnas para claridad y compatibilidad con Plotly
+
+    # Crear gráfico tipo treemap
+    fig = px.treemap(
+        tmp,
+        path=["alcaldia"],               # jerarquía del treemap: una sola capa por alcaldía
+        values="accidentes",             # tamaño de cada rectángulo proporcional al conteo
+        title="📍 Treemap: Accidentes por alcaldía (sin filtro)",
+        template=TEMPLATE,               # estilo visual global
+        color="accidentes",              # color proporcional al número de accidentes
+        color_continuous_scale=[         # escala de color personalizada (rojos degradados)
+            "#ffffff", "#fcae91", "#fb6a4a", "#de2d26", "#a50f15"
+        ]
+    )
+
+    return fig
+
+
+
+
+def fig_tendencia_mensual_accidentes(df: pd.DataFrame):
+    """
+    Genera una línea de tendencia con la evolución mensual del número de accidentes.
+
+    Parámetros
+    ----------
+    df : pd.DataFrame
+        DataFrame con una columna 'mes' (número del 1 al 12) ya preprocesada.
+
+    Retorna
+    -------
+    plotly.graph_objs._figure.Figure
+        Gráfico de línea con marcadores que muestra el total de accidentes por mes.
+        Si el DataFrame está vacío o le falta la columna 'mes', se devuelve una figura vacía.
+    """
+
+    # Validación: si no hay datos o falta la columna 'mes', devolver figura vacía
+    if df.empty or "mes" not in df.columns:
+        return px.line(title="Sin datos para mostrar", template=TEMPLATE)
+
+    # Importar catálogos desde el módulo theme
+    from .theme import NUM_A_MESES, MESES
+
+    # Agrupar: contar cuántos accidentes hay por cada mes (1 al 12)
+    tmp = df["mes"].value_counts().sort_index().reset_index()
+    # .value_counts(): cuenta ocurrencias por mes
+    # .sort_index(): asegura orden cronológico de los meses (1→12)
+    # .reset_index(): convierte a DataFrame
+
+    tmp.columns = ["mes", "accidentes"]  # renombrar columnas
+    tmp["mes_nombre"] = tmp["mes"].map(NUM_A_MESES)  # 1→"Enero", 2→"Febrero", etc.
+
+    # Crear gráfico de línea
+    fig = px.line(
+        tmp,
+        x="mes_nombre",           # eje X: nombres de meses
+        y="accidentes",           # eje Y: conteo por mes
+        title="📈 Tendencia mensual de accidentes (todos los datos)",
+        labels={
+            "mes_nombre": "Mes",
+            "accidentes": "Número de accidentes"
+        },
+        markers=True,             # muestra marcadores en los puntos de la línea
+        template=TEMPLATE         # estilo global del dashboard
+    )
+
+    # Ordena manualmente el eje X según el catálogo MESES (evita orden alfabético)
+    fig.update_layout(xaxis=dict(categoryorder="array", categoryarray=MESES))
+
+    return fig
+
+
+def fig_fallecidos_por_alcaldia(df: pd.DataFrame):
+    """
+    Genera un gráfico de barras que muestra el total de personas fallecidas por alcaldía.
+
+    Parámetros
+    ----------
+    df : pd.DataFrame
+        DataFrame con las columnas 'alcaldia' y 'personas_fallecidas'.
+
+    Retorna
+    -------
+    plotly.graph_objs._figure.Figure
+        Gráfico de barras ordenado de mayor a menor por cantidad de fallecidos.
+        Devuelve una figura vacía si faltan columnas o el DataFrame está vacío.
+    """
+
+    # Validación: verificar que el DataFrame tenga las columnas necesarias y no esté vacío
+    if df.empty or not {"alcaldia", "personas_fallecidas"}.issubset(df.columns):
+        return px.bar(title="Sin datos para mostrar", template=TEMPLATE)
+
+    # Agrupar y sumar fallecidos por alcaldía (solo donde ambas columnas tienen datos válidos)
+    tmp = (
+        df.dropna(subset=["alcaldia", "personas_fallecidas"])  # elimina registros incompletos
+        .groupby("alcaldia")["personas_fallecidas"]            # agrupa por alcaldía
+        .sum()                                                 # suma fallecidos por grupo
+        .sort_values(ascending=False)                          # ordena de mayor a menor
+        .reset_index()                                         # convierte índice en columna
+    )
+
+    # Crear gráfico de barras con etiquetas y color personalizado
+    fig = px.bar(
+        tmp,
+        x="alcaldia",                          # eje X: alcaldías
+        y="personas_fallecidas",               # eje Y: total de fallecidos
+        title="☠️ Total de personas fallecidas por alcaldía",
+        labels={
+            "alcaldia": "Alcaldía",
+            "personas_fallecidas": "Fallecidos"
+        },
+        template=TEMPLATE,
+        color_discrete_sequence=[PALETA[0]],   # primer color de la paleta definida en theme.py
+        text="personas_fallecidas"             # muestra número sobre cada barra
+    )
+
+    # Ajustes visuales del gráfico
+    fig.update_traces(textposition="outside")  # texto fuera de las barras
+    fig.update_layout(
+        yaxis_title="Fallecidos",
+        xaxis_title=""                         # eje X sin título extra
+    )
+
+    return fig
+
+
+
+

@@ -1,10 +1,19 @@
-#aplicacion web 
+# Aplicación principal del dashboard de accidentes en CDMX
 
 import streamlit as st 
 import pandas as pd
 from modules.data import load_data, filter_data
 from modules.filters import sidebar_global_filters
-from modules.charts import fig_accidentes_por_mes, fig_mapa_incidentes
+from modules.charts import (
+    fig_accidentes_por_mes,
+    fig_mapa_incidentes,
+    fig_accidentes_por_hora,
+    fig_fallecidos_por_alcaldia,
+    fig_tendencia_mensual_accidentes,
+    fig_treemap_accidentes_por_alcaldia,
+    fig_heatmap_hora_dia,
+)
+
 
 def main():
 
@@ -94,13 +103,13 @@ def main():
     else:
         st.info("No hay datos de coordenadas para los filtros actuales.")
 
+    st.divider()
+    
 
-    from modules.charts import fig_accidentes_por_hora
-
-# ===================== Tarjeta 4: Distribución por hora del día =====================
+    # ===================== Tarjeta 3: Distribución por hora del día =====================
     st.subheader("⏰ Distribución de accidentes por hora del día")
 
-    # Sin filtro local → usamos el df_global completo
+    # Sin filtro local 
     df_c4 = df_global.copy()
 
     # Mostrar gráfico
@@ -108,6 +117,46 @@ def main():
     st.divider()
 
 
+    # ===================== Tarjeta 4: Heatmap hora × día de la semana =====================
+    st.subheader("🔥 Heatmap: accidentes por hora y día de la semana")
+
+    # Sin filtros
+    df_c6 = df_global.copy()
+
+    st.plotly_chart(fig_heatmap_hora_dia(df_c6), use_container_width=True)
+    st.divider()
+
+    
+
+    # ===================== Tarjeta 5: Treemap de accidentes por alcaldía =====================
+    st.subheader("🏙️ Treemap de accidentes por alcaldía")
+
+    # Sin filtros 
+    df_c10 = df.copy()  # se ignora el filtro global, se usa todo
+
+    st.plotly_chart(fig_treemap_accidentes_por_alcaldia(df_c10), use_container_width=True)
+    st.divider()
+
+
+
+    # ===================== Tarjeta 6: Tendencia mensual (sin filtros) =====================
+    st.subheader("📈 Tendencia mensual de accidentes (todos los datos)")
+
+    # No depende de filtros
+    df_c11 = df.copy()
+
+    st.plotly_chart(fig_tendencia_mensual_accidentes(df_c11), use_container_width=True)
+    st.divider()
+
+
+
+    # ===================== Tarjeta 7: Fallecidos por alcaldía =====================
+    st.subheader("☠️ Total de personas fallecidas por alcaldía")
+
+    df_c16 = df.copy()
+
+    st.plotly_chart(fig_fallecidos_por_alcaldia(df_c16), use_container_width=True)
+    st.divider()
 
 
 if __name__ == "__main__":
