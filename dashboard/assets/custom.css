@@ -1,0 +1,40 @@
+/* Tipografía y base */
+:root{
+  --bg-kpi:#0f172a;        /* slate-900 */
+  --fg-kpi:#e2e8f0;        /* slate-200 */
+  --bg-card:#ffffff;
+  --bg-plot:#f8fafc;       /* slate-50 */
+  --border-soft:#e5e7eb;   /* gray-200 */
+  --shadow:0 1px 2px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.06);
+  --radius:14px;
+}
+body { background:#f3f4f6; }
+
+/* Tarjetas KPI */
+.card-kpi{
+  background:var(--bg-kpi);
+  color:var(--fg-kpi);
+  border:none;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+.card-kpi h5{ letter-spacing:.2px; font-weight:600; margin-bottom:.25rem; }
+.card-kpi h2{ font-weight:700; margin:0; }
+
+/* Tarjetas de gráficas */
+.card-plot{
+  background:var(--bg-card);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+.card-plot .card-header{
+  background:transparent;
+  border-bottom:1px solid var(--border-soft);
+}
+.card-plot h4{ margin:0; font-weight:700; }
+.card-plot .subtitle{ color:#64748b; font-size:.95rem; margin-top:.25rem; }
+.card-plot .insight{ color:#475569; font-size:.95rem; }
+
+/* Márgenes de gráficos para evitar recortes de labels */
+.plot-container{ padding: .5rem; background:var(--bg-plot); border-radius:12px; }

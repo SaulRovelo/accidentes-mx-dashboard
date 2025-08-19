@@ -1,35 +1,38 @@
-# Módulo centralizado para definir paleta de colores, estilo Plotly y catálogos (meses/días) 
-# con sus mapeos numéricos. 
+# Módulo de tema y catálogos para el dashboard (Dash + Plotly)
 
-
+# -----------------------
+# Colores y estilos
+# -----------------------
+# Paleta cualitativa con mayor variedad (azules, verdes, morados, naranjas, turquesa, rosa, gris azulado)
 PALETA = [
-    "#C22320",  # rojo intenso (principal, choques/accidentes graves)
-    "#B64845",  # rojo vino / terracota
-    "#FFA600",  # naranja fuerte (energía, advertencia)
-    "#F1BC7C",  # naranja claro (suave)
-    "#F4DB5B",  # amarillo cálido (precaución)
-    "#FFFDB7",  # amarillo muy claro (tono de fondo / menor gravedad)
+    "#2563EB",  # azul
+    "#10B981",  # verde
+    "#F59E0B",  # ámbar/naranja
+    "#8B5CF6",  # morado
+    "#06B6D4",  # turquesa
+    "#EF4444",  # rojo
+    "#F472B6",  # rosa
+    "#64748B",  # slate (gris azulado)
+    "#22C55E",  # verde claro
+    "#3B82F6",  # azul medio
 ]
 
-# PALETA: Lista de colores base para todos los gráficos
-
 TEMPLATE = "plotly_white"
-# TEMPLATE: Estilo global de Plotly. 
+MAPBOX_STYLE = "carto-positron"
 
+# Tipografía global a usar en apply_base_layout() dentro de charts.py
+FONT_FAMILY = "Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+
+# Enlace a la fuente de datos (ajusta al dataset exacto que usas)
+DATOS_FUENTE_URL = "https://datos.cdmx.gob.mx/"  # <-- reemplázalo por el link específico del CSV que usaste
+
+# -----------------------
+# Catálogos de tiempo
+# -----------------------
 DIAS_SEMANA = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-# DIAS_SEMANA: Catálogo ordenado (L→D)
 
-MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
-# MESES: Catálogo ordenado (Enero→Diciembre).
+MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
+         "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
 
 MESES_A_NUM = {m: i+1 for i, m in enumerate(MESES)}
-# MESES_A_NUM: Diccionario de mapeo mes→número (Enero:1, ..., Diciembre:12).
-# enumerate(MESES): genera pares (i, nombre_mes) empezando en 0 → por eso i+1.
-
 NUM_A_MESES = {v: k for k, v in MESES_A_NUM.items()}
-# NUM_A_MESES: Diccionario inverso número→mes (1:"Enero", ..., 12:"Diciembre").
-# items(): recorre pares (clave, valor) del diccionario original para construir el inverso.
-
-MAPBOX_STYLE = "carto-positron"  # o "open-street-map"
-# MAPBOX_STYLE: Estilo de mapa. 
-
