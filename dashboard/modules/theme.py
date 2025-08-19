@@ -2,7 +2,15 @@
 # con sus mapeos numéricos. 
 
 
-PALETA = ["#FF6361", "#58508D", "#FFA600", "#003F5C", "#BC5090", "#2F4B7C"]
+PALETA = [
+    "#C22320",  # rojo intenso (principal, choques/accidentes graves)
+    "#B64845",  # rojo vino / terracota
+    "#FFA600",  # naranja fuerte (energía, advertencia)
+    "#F1BC7C",  # naranja claro (suave)
+    "#F4DB5B",  # amarillo cálido (precaución)
+    "#FFFDB7",  # amarillo muy claro (tono de fondo / menor gravedad)
+]
+
 # PALETA: Lista de colores base para todos los gráficos
 
 TEMPLATE = "plotly_white"

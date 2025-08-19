@@ -10,4 +10,7 @@ plotly>=6.0.0        # Visualización interactiva de datos (>=6.0.0 para compati
 # Paquetes para la creación de aplicaciones web
 streamlit==1.28.0    # Framework para crear aplicaciones web interactivas
 
+# Dash
+dash==2.9.0          # Framework para crear aplicaciones web interactivas (similar a Streamlit)
+
 # Para instalar dependencias: pip install -r requirements.txt

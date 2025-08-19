@@ -105,7 +105,8 @@ def fig_mapa_incidentes(df: pd.DataFrame):
             "personas_lesionadas",
             "personas_fallecidas",
         ],
-        color="tipo_evento",        # colorea por tipo de evento (categoría)
+        color="tipo_evento",  
+        color_discrete_sequence=PALETA,      
         zoom=10,                    # zoom inicial (ajústalo si trabajas otro estado/ciudad)
         height=600                  # altura del contenedor del gráfico
     )
@@ -158,7 +159,7 @@ def fig_accidentes_por_hora(df: pd.DataFrame):
         labels={"hora": "Hora (0–23)", "accidentes": "Número de accidentes"},
         text="accidentes",  # muestra el valor encima de cada barra
         template=TEMPLATE,  # aplica el estilo global del dashboard
-        color_discrete_sequence=[PALETA[1]],  # segundo color de la paleta definida en theme.py
+        color_discrete_sequence=[PALETA[0]],  # segundo color de la paleta definida en theme.py
     )
 
     # Ajustes visuales del gráfico
@@ -283,59 +284,6 @@ def fig_treemap_accidentes_por_alcaldia(df: pd.DataFrame):
 
 
 
-
-def fig_tendencia_mensual_accidentes(df: pd.DataFrame):
-    """
-    Genera una línea de tendencia con la evolución mensual del número de accidentes.
-
-    Parámetros
-    ----------
-    df : pd.DataFrame
-        DataFrame con una columna 'mes' (número del 1 al 12) ya preprocesada.
-
-    Retorna
-    -------
-    plotly.graph_objs._figure.Figure
-        Gráfico de línea con marcadores que muestra el total de accidentes por mes.
-        Si el DataFrame está vacío o le falta la columna 'mes', se devuelve una figura vacía.
-    """
-
-    # Validación: si no hay datos o falta la columna 'mes', devolver figura vacía
-    if df.empty or "mes" not in df.columns:
-        return px.line(title="Sin datos para mostrar", template=TEMPLATE)
-
-    # Importar catálogos desde el módulo theme
-    from .theme import NUM_A_MESES, MESES
-
-    # Agrupar: contar cuántos accidentes hay por cada mes (1 al 12)
-    tmp = df["mes"].value_counts().sort_index().reset_index()
-    # .value_counts(): cuenta ocurrencias por mes
-    # .sort_index(): asegura orden cronológico de los meses (1→12)
-    # .reset_index(): convierte a DataFrame
-
-    tmp.columns = ["mes", "accidentes"]  # renombrar columnas
-    tmp["mes_nombre"] = tmp["mes"].map(NUM_A_MESES)  # 1→"Enero", 2→"Febrero", etc.
-
-    # Crear gráfico de línea
-    fig = px.line(
-        tmp,
-        x="mes_nombre",           # eje X: nombres de meses
-        y="accidentes",           # eje Y: conteo por mes
-        title="📈 Tendencia mensual de accidentes (todos los datos)",
-        labels={
-            "mes_nombre": "Mes",
-            "accidentes": "Número de accidentes"
-        },
-        markers=True,             # muestra marcadores en los puntos de la línea
-        template=TEMPLATE         # estilo global del dashboard
-    )
-
-    # Ordena manualmente el eje X según el catálogo MESES (evita orden alfabético)
-    fig.update_layout(xaxis=dict(categoryorder="array", categoryarray=MESES))
-
-    return fig
-
-
 def fig_fallecidos_por_alcaldia(df: pd.DataFrame):
     """
     Genera un gráfico de barras que muestra el total de personas fallecidas por alcaldía.
@@ -390,5 +338,84 @@ def fig_fallecidos_por_alcaldia(df: pd.DataFrame):
     return fig
 
 
+def fig_prioridad_atencion(df: pd.DataFrame):
+    """
+    Genera un gráfico circular (pie chart) con la distribución de prioridad de atención.
 
+    Parámetros
+    ----------
+    df : pd.DataFrame
+        DataFrame con columna 'prioridad'.
+
+    Retorna
+    -------
+    plotly.graph_objs._figure.Figure
+        Gráfico circular con porcentajes y etiquetas.
+    """
+
+    # Validación: verificar que la columna exista y no esté vacío
+    if df.empty or "prioridad" not in df.columns:
+        return px.pie(title="Sin datos para mostrar", template=TEMPLATE)
+
+    fig = px.pie(
+        df,
+        names="prioridad",
+        title="🎯 Distribución de Prioridad de Atención",
+        color_discrete_sequence=px.colors.qualitative.Set2
+    )
+
+    # Ajustes visuales
+    fig.update_traces(
+        textinfo="label+percent",
+        textposition="outside",
+        insidetextorientation="radial",
+        marker=dict(line=dict(color="white", width=2))
+    )
+
+    return fig
+
+
+
+
+def fig_fallecidos_donut(df: pd.DataFrame):
+    if df.empty or "mes" not in df.columns or "personas_fallecidas" not in df.columns:
+        return px.pie(title="Sin datos para mostrar", template=TEMPLATE)
+
+    tmp = df.groupby("mes")["personas_fallecidas"].sum().reset_index()
+    tmp["mes_nombre"] = tmp["mes"].map(NUM_A_MESES)
+
+    fig = px.pie(
+        tmp,
+        names="mes_nombre",
+        values="personas_fallecidas",
+        hole=0.4,  # 👈 convierte en donut
+        title="☠️ Fallecidos por mes (donut)",
+        template=TEMPLATE,
+        color_discrete_sequence=PALETA
+    )
+    fig.update_traces(textinfo="label+percent")
+    return fig
+
+def fig_bubble_lesionados_vs_fallecidos_total(df: pd.DataFrame):
+    if df.empty:
+        return px.pie(title="Sin datos para mostrar", template=TEMPLATE)
+
+    valores = {
+        "Lesionados": int(df["personas_lesionadas"].fillna(0).sum()),
+        "Fallecidos": int(df["personas_fallecidas"].fillna(0).sum())
+    }
+
+    tmp = pd.DataFrame(list(valores.items()), columns=["categoria", "total"])
+
+    fig = px.pie(
+        tmp,
+        names="categoria",
+        values="total",
+        hole=0.5,
+        title="⚖️ Lesionados vs Fallecidos (total)",
+        template=TEMPLATE,
+        color_discrete_sequence=PALETA
+    )
+    fig.update_traces(textinfo="label+percent", pull=[0, 0.05])
+    return fig
 

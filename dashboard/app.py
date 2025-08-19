@@ -1,164 +1,134 @@
-# Aplicación principal del dashboard de accidentes en CDMX
+# dashboard/app_dash.py
+# Migración del dashboard de accidentes CDMX de Streamlit a Dash + Bootstrap
 
-import streamlit as st 
-import pandas as pd
-from modules.data import load_data, filter_data
-from modules.filters import sidebar_global_filters
+import dash
+from dash import dcc, html
+import dash_bootstrap_components as dbc
+from modules.data import load_data
 from modules.charts import (
     fig_accidentes_por_mes,
     fig_mapa_incidentes,
     fig_accidentes_por_hora,
     fig_fallecidos_por_alcaldia,
-    fig_tendencia_mensual_accidentes,
     fig_treemap_accidentes_por_alcaldia,
     fig_heatmap_hora_dia,
+    fig_prioridad_atencion,
+    fig_fallecidos_donut,
+    fig_bubble_lesionados_vs_fallecidos_total,
 )
 
+# 1) Inicializar app con Bootstrap
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app.title = "🚦 Dashboard de Accidentes CDMX"
 
-def main():
+# 2) Cargar datos
+df = load_data("data/accidentes_cdmx_limpio.csv")
 
-    # 1) Carga de datos
-    df = load_data("data/accidentes_cdmx_limpio.csv")
-    # load_data: Lee el CSV, parsea 'fecha_evento' a datetime y agrega columna 'mes' (1..12)
+# 3) KPIs
+total_accidentes = len(df)
+total_lesionados = int(df["personas_lesionadas"].fillna(0).sum())
+total_fallecidos = int(df["personas_fallecidas"].fillna(0).sum())
 
-    # 2) Panel GLOBAL: solo filtro de alcaldías
-    gsel = sidebar_global_filters(df)
-    # sidebar_global_filters: Renderiza checkboxes en la sidebar para elegir alcaldías
+kpi_cards = dbc.Row([
+    dbc.Col(dbc.Card(
+        dbc.CardBody([
+            html.H5("📍 Total Accidentes", className="card-title"),
+            html.H2(f"{total_accidentes:,}", className="card-text")
+        ]), className="shadow-sm"), md=4),
+    dbc.Col(dbc.Card(
+        dbc.CardBody([
+            html.H5("🩹 Personas Lesionadas", className="card-title"),
+            html.H2(f"{total_lesionados:,}", className="card-text")
+        ]), className="shadow-sm"), md=4),
+    dbc.Col(dbc.Card(
+        dbc.CardBody([
+            html.H5("⚰️ Personas Fallecidas", className="card-title"),
+            html.H2(f"{total_fallecidos:,}", className="card-text")
+        ]), className="shadow-sm"), md=4),
+])
 
-    df_global = df[df["alcaldia"].isin(gsel["alcaldias_sel"])]
-    # df_global: subconjunto del DataFrame según selección global de alcaldías
+# 4) Layout principal
+app.layout = dbc.Container([
+    html.H1("🚦 Dashboard de Accidentes en CDMX", className="my-4 text-center"),
 
-    # si no hay datos tras el filtro global, mostramos aviso y salimos
-    if df_global.empty:
-        st.title("🚦 Dashboard de Accidentes CDMX")
-        st.info("No hay datos con la selección de alcaldías actual. Ajusta el filtro global para continuar.")
-        return
-
-    # 3) Encabezado y KPIs
-    st.title("🚦 Dashboard de Accidentes CDMX")
-
-    # KPIs usando el df filtrado globalmente por alcaldías
-    col1, col2, col3 = st.columns(3)
-    col1.metric("📍 Total de Accidentes", len(df_global))
-    # len(): cuenta filas → número total de registros (accidentes) en df_global
-
-    col2.metric("🩹 Personas Lesionadas", int(df_global["personas_lesionadas"].fillna(0).sum()))
-    # fillna(0).sum(): suma robusta de lesionados (evita NaN)
-
-    col3.metric("⚰️ Personas Fallecidas", int(df_global["personas_fallecidas"].fillna(0).sum()))
-    # fillna(0).sum(): suma robusta de fallecidos (evita NaN)
-
-    st.divider()
-
-    # ===================== Tarjeta 1: Barras por mes =====================
-    st.subheader("📊 Accidentes por mes")
-
-    # Slider de meses debajo del gráfico (filtro LOCAL para esta tarjeta)
-    meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-             "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
-    # meses: catálogo ordenado para mostrar nombres correctos (Enero→Diciembre)
-
-    m_ini, m_fin = st.select_slider(
-        " ",  # etiqueta vacía para no duplicar títulos
-        options=meses,
-        value=("Enero", "Diciembre"),
-        key="meses_chart1"  # key: mantiene el estado del slider en esta tarjeta
-    )
-
-    # Mapear nombres a números y aplicar filtro local (rango de meses)
-    meses_numeros = {m: i+1 for i, m in enumerate(meses)}  # {"Enero":1, ..., "Diciembre":12}
-    m_ini_n, m_fin_n = meses_numeros[m_ini], meses_numeros[m_fin]
-    df_c1 = df_global[df_global["mes"].between(m_ini_n, m_fin_n)]
-    # df_c1: subconjunto para la gráfica de barras por mes (filtrado local)
-
-    # Mostrar la gráfica de barras (usa función del módulo charts)
-    st.plotly_chart(fig_accidentes_por_mes(df_c1), use_container_width=True)
-
-    st.divider()
-
-    # ===================== Tarjeta 2: Mapa con tipo_evento =====================
-    st.subheader("🗺️ Mapa de incidentes")
-
-    # Bloque de filtros LOCALes (tipo_evento) para esta tarjeta
-    tipos = sorted(df_global["tipo_evento"].dropna().unique())
-    seleccionar_todos = st.checkbox("Seleccionar todos", value=True, key="sel_todos_chart2")
-    # seleccionar_todos: si está activo, incluimos todos los tipos; si no, permitimos granularidad
-
-    cols = st.columns(4)  # Distribuye checkboxes en 4 columnas para mejor legibilidad
-    tipos_sel = []
-
-    for i, tipo in enumerate(tipos):
-        # Si "Seleccionar todos" está activo, no mostramos checkboxes individuales
-        # (o los ignoramos). Si no, activamos checkboxes por tipo.
-        if seleccionar_todos or cols[i % 4].checkbox(tipo, value=False, key=f"check_{tipo}"):
-            tipos_sel.append(tipo)
-
-    # Filtrado local por tipo_evento para el mapa
-    df_c2 = df_global[df_global["tipo_evento"].isin(tipos_sel)]
-
-    # Crear figura de mapa con scatter_mapbox (módulo charts)
-    fig_map = fig_mapa_incidentes(df_c2)
-    if fig_map is not None:
-        st.plotly_chart(fig_map, use_container_width=True)
-    else:
-        st.info("No hay datos de coordenadas para los filtros actuales.")
-
-    st.divider()
-    
-
-    # ===================== Tarjeta 3: Distribución por hora del día =====================
-    st.subheader("⏰ Distribución de accidentes por hora del día")
-
-    # Sin filtro local 
-    df_c4 = df_global.copy()
-
-    # Mostrar gráfico
-    st.plotly_chart(fig_accidentes_por_hora(df_c4), use_container_width=True)
-    st.divider()
-
-
-    # ===================== Tarjeta 4: Heatmap hora × día de la semana =====================
-    st.subheader("🔥 Heatmap: accidentes por hora y día de la semana")
-
-    # Sin filtros
-    df_c6 = df_global.copy()
-
-    st.plotly_chart(fig_heatmap_hora_dia(df_c6), use_container_width=True)
-    st.divider()
+    # KPIs
+    kpi_cards,
+    html.Hr(),
 
     
 
-    # ===================== Tarjeta 5: Treemap de accidentes por alcaldía =====================
-    st.subheader("🏙️ Treemap de accidentes por alcaldía")
+    # 1️⃣ Treemap + Mapa (2 juntas)
+    dbc.Row([
+        dbc.Col(dbc.Card([
+            dbc.CardHeader("🏙️ Treemap por alcaldía"),
+            dbc.CardBody(dcc.Graph(figure=fig_treemap_accidentes_por_alcaldia(df)))
+        ]), md=6),
 
-    # Sin filtros 
-    df_c10 = df.copy()  # se ignora el filtro global, se usa todo
-
-    st.plotly_chart(fig_treemap_accidentes_por_alcaldia(df_c10), use_container_width=True)
-    st.divider()
-
-
-
-    # ===================== Tarjeta 6: Tendencia mensual (sin filtros) =====================
-    st.subheader("📈 Tendencia mensual de accidentes (todos los datos)")
-
-    # No depende de filtros
-    df_c11 = df.copy()
-
-    st.plotly_chart(fig_tendencia_mensual_accidentes(df_c11), use_container_width=True)
-    st.divider()
+        dbc.Col(dbc.Card([
+            dbc.CardHeader("🗺️ Mapa de incidentes"),
+            dbc.CardBody(dcc.Graph(figure=fig_mapa_incidentes(df)))
+        ]), md=6),
+    ], className="mb-4"),
 
 
+     # Distribución de prioridad (sola)
+    dbc.Row([
+        dbc.Col(dbc.Card([
+            dbc.CardHeader("🎯 Distribución de prioridad de atención"),
+            dbc.CardBody(dcc.Graph(figure=fig_prioridad_atencion(df)))
+        ]), md=12),
+    ], className="mb-4"),
 
-    # ===================== Tarjeta 7: Fallecidos por alcaldía =====================
-    st.subheader("☠️ Total de personas fallecidas por alcaldía")
+    # 2️⃣ Accidentes por hora + Heatmap (2 juntas)
+    dbc.Row([
+        dbc.Col(dbc.Card([
+            dbc.CardHeader("⏰ Accidentes por hora"),
+            dbc.CardBody(dcc.Graph(figure=fig_accidentes_por_hora(df)))
+        ]), md=6),
 
-    df_c16 = df.copy()
+        dbc.Col(dbc.Card([
+            dbc.CardHeader("🔥 Heatmap hora × día"),
+            dbc.CardBody(dcc.Graph(figure=fig_heatmap_hora_dia(df)))
+        ]), md=6),
+    ], className="mb-4"),
 
-    st.plotly_chart(fig_fallecidos_por_alcaldia(df_c16), use_container_width=True)
-    st.divider()
+    # 3️⃣ Donut de fallecidos (sola)
+    dbc.Row([
+        dbc.Col(dbc.Card([
+            dbc.CardHeader("☠️ Fallecidos por mes (donut)"),
+            dbc.CardBody(dcc.Graph(figure=fig_fallecidos_donut(df)))
+        ]), md=12),
+    ], className="mb-4"),
+
+    # 4️⃣ Accidentes por mes + Fallecidos por alcaldía (2 juntas)
+    dbc.Row([
+        dbc.Col(dbc.Card([
+            dbc.CardHeader("📊 Accidentes por mes"),
+            dbc.CardBody(dcc.Graph(figure=fig_accidentes_por_mes(df)))
+        ]), md=6),
+
+        dbc.Col(dbc.Card([
+            dbc.CardHeader("☠️ Fallecidos por alcaldía"),
+            dbc.CardBody(dcc.Graph(figure=fig_fallecidos_por_alcaldia(df)))
+        ]), md=6),
+    ], className="mb-4"),
+
+
+dbc.Row([
+    dbc.Col(dbc.Card([
+        dbc.CardHeader("⚖️ Lesionados vs Fallecidos (donut)"),
+        dbc.CardBody(dcc.Graph(figure=fig_bubble_lesionados_vs_fallecidos_total(df)))
+    ]), md=12),
+], className="mb-4"),
+
+
+
+], fluid=True)
+
+
+# 5) Arranque
 
 
 if __name__ == "__main__":
-    main()
- 
+    app.run(debug=True, port=8050)
+
