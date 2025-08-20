@@ -162,12 +162,16 @@ def fig_heatmap_hora_dia(df: pd.DataFrame):
 
 # ---------- Treemap por alcaldía ----------
 def fig_treemap_accidentes_por_alcaldia(df: pd.DataFrame, min_acc: int = 0):
+    import plotly.express as px
+
     if df.empty or "alcaldia" not in df.columns:
-        return px.treemap(title="Sin datos para construir el treemap", template=TEMPLATE)
+        return px.treemap(title="Sin datos para construir el treemap", template="plotly_white")
 
     # Agrupación y filtrado
     tmp = df["alcaldia"].dropna().value_counts().reset_index()
     tmp.columns = ["alcaldia", "accidentes"]
+
+    max_total = tmp["accidentes"].max()
     tmp = tmp[tmp["accidentes"] >= min_acc]
 
     if tmp.empty:
@@ -175,21 +179,47 @@ def fig_treemap_accidentes_por_alcaldia(df: pd.DataFrame, min_acc: int = 0):
         fig.update_layout(title=None)
         return apply_base_layout(fig, title="", subtitle=None, height=520, margins=(20, 20, 64, 20))
 
+    # Escala fija para que el color sea consistente
     fig = px.treemap(
-        tmp, path=["alcaldia"], values="accidentes",
+        tmp,
+        path=["alcaldia"],
+        values="accidentes",
         color="accidentes",
-        color_continuous_scale=[
-            "#f6db85", "#f7c585", "#f3a784", "#d96457", "#b80000"
-        ],
+        color_continuous_scale=["#f6db85", "#f7c585", "#f3a784", "#d96457", "#b80000"],
+        range_color=[0, max_total],  # <- fija el rango de color
         template="plotly_white"
     )
 
-    fig.update_layout(
-        title=None,
-        paper_bgcolor="white",
-        plot_bgcolor="white",
-        margin=dict(t=0, l=0, r=0, b=0)
+    fig.update_traces(
+        textinfo="label+value",
+        marker=dict(cornerradius=5),
+        hovertemplate="<b>%{label}</b><br>Accidentes: %{value}<extra></extra>"
     )
+
+    fig.update_layout(
+    title=None,
+    paper_bgcolor="white",
+    plot_bgcolor="white",
+    margin=dict(t=0, l=0, r=0, b=0),
+    coloraxis_colorbar=dict(
+        title="Accidentes",
+        tickmode="array",
+        tickvals=[0, 1000, 2000, 3000, 4000],
+        ticktext=["0", "1,000", "2,000", "3,000", "4,000"],
+        ticks="outside",
+        tickcolor="black",
+        ticklen=8,
+        tickfont=dict(size=12, color="black"),
+        showticklabels=True,
+        len=0.8,
+        thickness=18,
+        y=0.5,
+        yanchor="middle"
+    )
+
+
+)
+
 
     return apply_base_layout(
         fig,
@@ -198,6 +228,8 @@ def fig_treemap_accidentes_por_alcaldia(df: pd.DataFrame, min_acc: int = 0):
         height=520,
         margins=(20, 20, 64, 20)
     )
+
+
 
 # ---------- Barras: fallecidos por alcaldía ----------
 def fig_fallecidos_por_alcaldia(df: pd.DataFrame):

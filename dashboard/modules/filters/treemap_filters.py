@@ -1,7 +1,9 @@
 # dashboard/modules/filters/treemap_filters.py
+
 import math
 from dash import dcc
 
+# --- Función para obtener un número "agradable" como step del slider ---
 def _nice_number(x, round_to=True):
     if x <= 0:
         return 1.0
@@ -19,6 +21,7 @@ def _nice_number(x, round_to=True):
         else: nf = 10
     return nf * (10 ** exp)
 
+# --- Función que genera marcas (ticks) para el slider ---
 def build_slider_marks(min_v, max_v, target_ticks=6):
     span = max_v - min_v
     if span <= 0:
@@ -36,9 +39,11 @@ def build_slider_marks(min_v, max_v, target_ticks=6):
     seen, ordered = set(), []
     for n in values:
         if n not in seen:
-            ordered.append(n); seen.add(n)
+            ordered.append(n)
+            seen.add(n)
     return {n: f"{n:,}" for n in ordered}
 
+# --- Componente Slider interactivo ---
 def slider_min_accidentes(min_val, max_val):
     return dcc.Slider(
         id="slider-min-accidentes",
@@ -48,5 +53,5 @@ def slider_min_accidentes(min_val, max_val):
         value=min_val,
         marks=build_slider_marks(min_val, max_val),
         tooltip={"always_visible": False},
-        className="mt-3"
+        className="slider-negro mt-3"  # 👈 Clase CSS personalizada para color negro
     )

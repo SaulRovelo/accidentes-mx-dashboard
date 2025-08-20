@@ -45,3 +45,21 @@ body { background:#f3f4f6; }
 .rc-slider-tooltip, .rc-slider-tooltip-hidden {
   display: none !important;
 }
+
+/* Color del thumb y barra del slider */
+.slider-negro .rc-slider-track {
+    background-color: black;
+}
+
+.slider-negro .rc-slider-handle {
+    background-color: black;
+    border-color: black;
+}
+
+.slider-negro .rc-slider-dot-active {
+    border-color: black;
+}
+
+.slider-negro .rc-slider-rail {
+    background-color: #cbd5e1; /* gris claro */
+}
