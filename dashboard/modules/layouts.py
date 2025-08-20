@@ -28,17 +28,17 @@ def card_mapa(df):
             html.H4("Mapa de incidentes"),
             html.Div("Localización geográfica de los siniestros.", className="subtitle"),
             get_radio_tipo_evento(df)
-        ])),
+        ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
             dcc.Graph(
                 id="mapa-figure",
                 figure=fig_mapa_incidentes(df),
                 className="plot-container",
                 config={"responsive": True},
-                style={"width": "90%", "maxWidth": "700px", "height": "500px", "margin": "0 auto"}  # 👈 más uniforme
+                style={"width": "90%", "maxWidth": "700px", "height": "500px", "margin": "0 auto"}
             ),
         ])
-    ], className="card-plot", style={"height": "700px"})  # 👈 altura fija
+    ], className="card-plot", style={"height": "700px"})
 
 # --- CARD: Treemap de accidentes por alcaldía ---
 def card_treemap(df, min_acc, max_acc):
@@ -48,31 +48,41 @@ def card_treemap(df, min_acc, max_acc):
             html.Div("Alcaldías con mayor número de reportes de accidentes.", className="subtitle"),
             slider_min_accidentes(min_acc, max_acc),
             html.Div(id="slider-valor-visible", className="text-center text-muted small py-1")
-        ])),
+        ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
             dcc.Graph(
                 id="treemap-figure",
                 figure=fig_treemap_accidentes_por_alcaldia(df, min_acc),
                 className="plot-container",
                 config={"responsive": True},
-                style={"height": "500px"}  # 👈 igual que el otro gráfico
+                style={"height": "500px"}
             )
         ])
-    ], className="card-plot", style={"height": "700px"})  # 👈 altura fija
-
-
+    ], className="card-plot", style={"height": "700px"})
 
 # --- CARD: Distribución de prioridad de atención ---
+# --- layouts.py (solo el Graph de card_prioridad para asegurar centrado) ---
 def card_prioridad(df):
     return dbc.Card([
         dbc.CardHeader(html.Div([
             html.H4("Distribución de prioridad de atención"),
-            html.Div("Proporción de reportes por nivel de prioridad.", className="subtitle")
-        ])),
+            html.Div("Proporción de incidentes clasificados en prioridad Alta, Media y Baja.", className="subtitle")
+        ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
-            dcc.Graph(figure=fig_prioridad_atencion(df), className="plot-container")
+            dcc.Graph(
+                id="prioridad-figure",
+                figure=fig_prioridad_atencion(df),
+                config={"responsive": True},
+                style={
+                    "width": "90%",
+                    "maxWidth": "680px",   # da más respiro al label de 'Alta' fuera
+                    "height": "460px",
+                    "margin": "0 auto"     # centra el canvas del gráfico
+                },
+                className="plot-container"
+            )
         ])
-    ], className="card-plot")
+    ], className="mb-4")
 
 
 # --- CARD: Accidentes por hora ---
@@ -81,12 +91,11 @@ def card_hora(df):
         dbc.CardHeader(html.Div([
             html.H4("Accidentes por hora"),
             html.Div("Picos en horarios laborales y fines de semana.", className="subtitle")
-        ])),
+        ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
             dcc.Graph(figure=fig_accidentes_por_hora(df), className="plot-container")
         ])
     ], className="card-plot")
-
 
 # --- CARD: Heatmap hora vs día ---
 def card_heatmap(df):
@@ -94,12 +103,11 @@ def card_heatmap(df):
         dbc.CardHeader(html.Div([
             html.H4("Accidentes por hora y día"),
             html.Div("Mapa de calor por franja horaria y día de la semana.", className="subtitle")
-        ])),
+        ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
             dcc.Graph(figure=fig_heatmap_hora_dia(df), className="plot-container")
         ])
     ], className="card-plot")
-
 
 # --- CARD: Donut de fallecidos por mes ---
 def card_fallecidos_mes(df):
@@ -107,12 +115,11 @@ def card_fallecidos_mes(df):
         dbc.CardHeader(html.Div([
             html.H4("Fallecidos por mes"),
             html.Div("Distribución mensual de víctimas fatales.", className="subtitle")
-        ])),
+        ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
             dcc.Graph(figure=fig_fallecidos_donut(df), className="plot-container")
         ])
     ], className="card-plot")
-
 
 # --- CARD: Accidentes por mes ---
 def card_mes(df):
@@ -120,12 +127,11 @@ def card_mes(df):
         dbc.CardHeader(html.Div([
             html.H4("Accidentes por mes"),
             html.Div("Tendencia mensual de reportes en 2024.", className="subtitle")
-        ])),
+        ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
             dcc.Graph(figure=fig_accidentes_por_mes(df), className="plot-container")
         ])
     ], className="card-plot")
-
 
 # --- CARD: Fallecidos por alcaldía ---
 def card_fallecidos_alcaldia(df):
@@ -133,12 +139,11 @@ def card_fallecidos_alcaldia(df):
         dbc.CardHeader(html.Div([
             html.H4("Fallecidos por alcaldía"),
             html.Div("Totales por demarcación.", className="subtitle")
-        ])),
+        ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
             dcc.Graph(figure=fig_fallecidos_por_alcaldia(df), className="plot-container")
         ])
     ], className="card-plot")
-
 
 # --- CARD: Lesionados vs fallecidos (donut) ---
 def card_les_vs_fall(df):
@@ -146,12 +151,11 @@ def card_les_vs_fall(df):
         dbc.CardHeader(html.Div([
             html.H4("Lesionados vs fallecidos (total)"),
             html.Div("Relación acumulada en el año.", className="subtitle")
-        ])),
+        ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
             dcc.Graph(figure=fig_bubble_lesionados_vs_fallecidos_total(df), className="plot-container")
         ])
     ], className="card-plot")
-
 
 # --- CARD: Tipo de evento ---
 def card_tipo_evento(df):
@@ -159,7 +163,7 @@ def card_tipo_evento(df):
         dbc.CardHeader(html.Div([
             html.H4("Distribución por tipo de evento"),
             html.Div("Volumen de reportes por categoría, paleta consistente con el mapa.", className="subtitle")
-        ])),
+        ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
             dcc.Graph(figure=fig_eventos_por_tipo(df), className="plot-container")
         ])

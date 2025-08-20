@@ -234,7 +234,7 @@ def fig_treemap_accidentes_por_alcaldia(df: pd.DataFrame, min_acc: int = 0):
     if tmp.empty:
         fig = px.treemap(title="Sin datos para el umbral seleccionado", template="plotly_white")
         fig.update_layout(title=None)
-        return apply_base_layout(fig, title="", subtitle=None, height=520, margins=(20, 20, 64, 20))
+        return apply_base_layout(fig, title="", subtitle=None, height=520, margins=(20, 0, 20, 20))
 
     # Escala fija para que el color sea consistente
     fig = px.treemap(
@@ -277,13 +277,12 @@ def fig_treemap_accidentes_por_alcaldia(df: pd.DataFrame, min_acc: int = 0):
 
 )
 
-
     return apply_base_layout(
         fig,
         title="",
         subtitle=None,
         height=520,
-        margins=(20, 20, 64, 20)
+        margins=(20, 0, 20, 20)
     )
 
 
@@ -319,25 +318,50 @@ def fig_prioridad_atencion(df: pd.DataFrame):
     if df.empty or "prioridad" not in df.columns:
         return px.pie(title="Sin datos para mostrar", template=TEMPLATE)
 
-    # Usamos colores de la paleta para mayor coherencia visual
+    df = df.copy()
+    df["prioridad"] = df["prioridad"].str.capitalize()
+
+    tmp = df["prioridad"].value_counts().reset_index()
+    tmp.columns = ["prioridad", "casos"]
+
+    colores_prioridad = {
+        "Alta": "#e63946",   # rojo
+        "Media": "#ffb703",  # ámbar vivo
+        "Baja": "#219ebc"    # azul sobrio
+    }
+
     fig = px.pie(
-        df, names="prioridad",
+        tmp,
+        names="prioridad",
+        values="casos",
+        hole=0.42,
         template=TEMPLATE,
         color="prioridad",
-        color_discrete_sequence=PALETA
+        color_discrete_map=colores_prioridad
     )
+
+    # 🔑 Todas las etiquetas afuera
     fig.update_traces(
         textinfo="label+percent",
+        texttemplate="<b>%{label}</b><br>%{percent} — %{value:,} casos",
         textposition="outside",
-        insidetextorientation="radial",
-        marker=dict(line=dict(color="white", width=2))
+        marker=dict(line=dict(color="white", width=2)),
+        pull=[0.08 if p == "Alta" else 0 for p in tmp["prioridad"]],
+        outsidetextfont=dict(size=15, family="Segoe UI, Arial, sans-serif", color="#2b2b2b"),
+        hovertemplate="<b>%{label}</b><br>Casos: %{value:,}<br>Porcentaje: %{percent}<extra></extra>"
     )
+
+    # 🔑 Leyenda desactivada (innecesaria con etiquetas afuera)
+    fig.update_layout(showlegend=False)
+
     return apply_base_layout(
         fig,
         title="Distribución de prioridad de atención",
-        subtitle="Proporción de reportes clasificados por prioridad.",
-        height=430, margins=(20,20,64,20)
+        #subtitle="Proporción de incidentes clasificados en prioridad Alta, Media y Baja.",
+        height=480,
+        margins=(24, 24, 64, 24)
     )
+
 
 
 # ---------- Donut: fallecidos por mes ----------
