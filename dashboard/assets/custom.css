@@ -1,7 +1,9 @@
 /* Tipografía y base */
 :root{
-  --bg-kpi:#0f172a;        /* slate-900 */
-  --fg-kpi:#e2e8f0;        /* slate-200 */
+    --bg-kpi:#ffffff;
+    --fg-kpi:#111827;        /* texto negro con leve gris */
+      /* slate-800 (texto más oscuro) */
+
   --bg-card:#ffffff;
   --bg-plot:#f8fafc;       /* slate-50 */
   --border-soft:#e5e7eb;   /* gray-200 */
@@ -38,3 +40,8 @@ body { background:#f3f4f6; }
 
 /* Márgenes de gráficos para evitar recortes de labels */
 .plot-container{ padding: .5rem; background:var(--bg-plot); border-radius:12px; }
+
+/* Forzar que no se muestre el tooltip del Slider de Dash */
+.rc-slider-tooltip, .rc-slider-tooltip-hidden {
+  display: none !important;
+}

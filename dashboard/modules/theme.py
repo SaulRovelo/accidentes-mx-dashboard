@@ -5,17 +5,20 @@
 # -----------------------
 # Paleta cualitativa con mayor variedad (azules, verdes, morados, naranjas, turquesa, rosa, gris azulado)
 PALETA = [
-    "#2563EB",  # azul
-    "#10B981",  # verde
-    "#F59E0B",  # ámbar/naranja
-    "#8B5CF6",  # morado
-    "#06B6D4",  # turquesa
-    "#EF4444",  # rojo
-    "#F472B6",  # rosa
-    "#64748B",  # slate (gris azulado)
-    "#22C55E",  # verde claro
-    "#3B82F6",  # azul medio
+    "#f4a261",  # Terracota suave
+    "#2a9d8f",  # Verde agua sobrio
+    "#f5dda1",  # Amarillo dorado tenue
+    "#264653",  # Azul petróleo elegante
+    "#a8dadc",  # Azul pastel claro
+    "#8ecae6",  # Azul cielo suave
+    "#f3cd6e",  # Amarillo vibrante
+    "#219ebc",  # Azul acero sutil
+    "#b5838d",  # Rosa antiguo
+    "#6a994e",  # Verde oliva fresco
 ]
+
+
+
 
 TEMPLATE = "plotly_white"
 MAPBOX_STYLE = "carto-positron"
@@ -24,7 +27,7 @@ MAPBOX_STYLE = "carto-positron"
 FONT_FAMILY = "Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
 
 # Enlace a la fuente de datos (ajusta al dataset exacto que usas)
-DATOS_FUENTE_URL = "https://datos.cdmx.gob.mx/"  # <-- reemplázalo por el link específico del CSV que usaste
+DATOS_FUENTE_URL = "https://datos.cdmx.gob.mx/dataset/hechos-de-transito-registrados-por-la-ssc-2024-serie-de-datos-ampliada-no-comparativa"  # <-- reemplázalo por el link específico del CSV que usaste
 
 # -----------------------
 # Catálogos de tiempo

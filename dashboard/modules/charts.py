@@ -19,7 +19,7 @@ def apply_base_layout(fig, title, subtitle=None, height=420, margins=(24,20,68,2
         title=dict(text=title, x=0.0, xanchor="left"),
         height=height,
         margin=dict(l=margins[0], r=margins[1], t=margins[2], b=margins[3]),
-        font=dict(family=FONT_FAMILY, size=14, color="#0f172a"),
+        font=dict(family=FONT_FAMILY, size=14, color="#ffffff"),
         paper_bgcolor="#ffffff",
         plot_bgcolor="#ffffff",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
@@ -161,26 +161,43 @@ def fig_heatmap_hora_dia(df: pd.DataFrame):
 
 
 # ---------- Treemap por alcaldía ----------
-def fig_treemap_accidentes_por_alcaldia(df: pd.DataFrame):
+def fig_treemap_accidentes_por_alcaldia(df: pd.DataFrame, min_acc: int = 0):
     if df.empty or "alcaldia" not in df.columns:
         return px.treemap(title="Sin datos para construir el treemap", template=TEMPLATE)
 
+    # Agrupación y filtrado
     tmp = df["alcaldia"].dropna().value_counts().reset_index()
     tmp.columns = ["alcaldia", "accidentes"]
+    tmp = tmp[tmp["accidentes"] >= min_acc]
+
+    if tmp.empty:
+        fig = px.treemap(title="Sin datos para el umbral seleccionado", template="plotly_white")
+        fig.update_layout(title=None)
+        return apply_base_layout(fig, title="", subtitle=None, height=520, margins=(20, 20, 64, 20))
 
     fig = px.treemap(
         tmp, path=["alcaldia"], values="accidentes",
         color="accidentes",
-        color_continuous_scale=["#e2e8f0", "#bae6fd", "#60a5fa", "#2563eb", "#1d4ed8"],
-        template=TEMPLATE
-    )
-    return apply_base_layout(
-        fig,
-        title="Accidentes por alcaldía",
-        subtitle="Comparativo del volumen de siniestros por demarcación.",
-        height=520, margins=(20,20,64,20)
+        color_continuous_scale=[
+            "#f6db85", "#f7c585", "#f3a784", "#d96457", "#b80000"
+        ],
+        template="plotly_white"
     )
 
+    fig.update_layout(
+        title=None,
+        paper_bgcolor="white",
+        plot_bgcolor="white",
+        margin=dict(t=0, l=0, r=0, b=0)
+    )
+
+    return apply_base_layout(
+        fig,
+        title="",
+        subtitle=None,
+        height=520,
+        margins=(20, 20, 64, 20)
+    )
 
 # ---------- Barras: fallecidos por alcaldía ----------
 def fig_fallecidos_por_alcaldia(df: pd.DataFrame):
