@@ -34,12 +34,11 @@ def card_mapa(df):
                 id="mapa-figure",
                 figure=fig_mapa_incidentes(df),
                 className="plot-container",
-                config={"responsive": True},                # ← que responda al ancho del contenedor
-                style={"width": "90%", "maxWidth": "700px", "height": "580px", "margin": "0 auto"}
+                config={"responsive": True},
+                style={"width": "90%", "maxWidth": "700px", "height": "500px", "margin": "0 auto"}  # 👈 más uniforme
             ),
-           
         ])
-    ], className="card-plot")
+    ], className="card-plot", style={"height": "700px"})  # 👈 altura fija
 
 # --- CARD: Treemap de accidentes por alcaldía ---
 def card_treemap(df, min_acc, max_acc):
@@ -54,10 +53,13 @@ def card_treemap(df, min_acc, max_acc):
             dcc.Graph(
                 id="treemap-figure",
                 figure=fig_treemap_accidentes_por_alcaldia(df, min_acc),
-                className="plot-container"
+                className="plot-container",
+                config={"responsive": True},
+                style={"height": "500px"}  # 👈 igual que el otro gráfico
             )
         ])
-    ], className="card-plot")
+    ], className="card-plot", style={"height": "700px"})  # 👈 altura fija
+
 
 
 # --- CARD: Distribución de prioridad de atención ---

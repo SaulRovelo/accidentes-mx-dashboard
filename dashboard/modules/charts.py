@@ -83,7 +83,7 @@ def fig_mapa_incidentes(df: pd.DataFrame):
         "caida de ciclista": "#8ecae6",
     }
     orden_tipos = list(COLOR_EVENTOS.keys())
-    FIG_H = 580  # Altura fija; el ancho lo determina el contenedor (dcc.Graph style={"width":"100%"})
+    FIG_H = 480  # Altura fija; el ancho lo determina el contenedor (dcc.Graph style={"width":"100%"})
 
     # Figura base: siempre color por tipo_evento
     fig = px.scatter_mapbox(
@@ -96,7 +96,7 @@ def fig_mapa_incidentes(df: pd.DataFrame):
         color_discrete_map=COLOR_EVENTOS,
         category_orders={"tipo_evento": orden_tipos},
         height=FIG_H,
-        zoom=9.5,  # 👈 Deja el zoom tal cual
+        zoom=9.3,  # 👈 Deja el zoom tal cual
         center=dict(lat=19.350, lon=-99.145),  # 👈 Centro CDMX
     )
 
@@ -117,10 +117,10 @@ def fig_mapa_incidentes(df: pd.DataFrame):
         autosize=True,          # el ancho lo controla la tarjeta
         height=FIG_H,
         uirevision="mapa_cdmx", # congela la vista entre callbacks
-        margin=dict(l=0, r=0, t=40, b=0),
+        margin=dict(l=0, r=0, t=0, b=0),
         mapbox=dict(
             style="carto-positron",
-            zoom=9.5,
+            zoom=9.3,
             center=dict(lat=19.350, lon=-99.145),
         ),
         showlegend=True,
