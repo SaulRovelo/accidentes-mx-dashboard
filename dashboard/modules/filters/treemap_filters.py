@@ -53,5 +53,5 @@ def slider_min_accidentes(min_val, max_val):
         value=min_val,
         marks=build_slider_marks(min_val, max_val),
         tooltip={"always_visible": False},
-        className="slider-negro mt-3"  # 👈 Clase CSS personalizada para color negro
+        className="slider-negro mt-3" 
     )

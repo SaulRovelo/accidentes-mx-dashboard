@@ -30,18 +30,23 @@ def card_mapa(df):
             get_radio_tipo_evento(df)
         ])),
         dbc.CardBody([
-            dcc.Graph(id="mapa-figure", figure=fig_mapa_incidentes(df), className="plot-container"),
-            html.P("Los corredores viales principales muestran alta densidad de puntos.", className="insight")
+            dcc.Graph(
+                id="mapa-figure",
+                figure=fig_mapa_incidentes(df),
+                className="plot-container",
+                config={"responsive": True},                # ← que responda al ancho del contenedor
+                style={"width": "90%", "maxWidth": "700px", "height": "580px", "margin": "0 auto"}
+            ),
+           
         ])
     ], className="card-plot")
-
 
 # --- CARD: Treemap de accidentes por alcaldía ---
 def card_treemap(df, min_acc, max_acc):
     return dbc.Card([
         dbc.CardHeader(html.Div([
             html.H4("Accidentes por alcaldía"),
-            html.Div("Comparativo del volumen por demarcación.", className="subtitle"),
+            html.Div("Alcaldías con mayor número de reportes de accidentes.", className="subtitle"),
             slider_min_accidentes(min_acc, max_acc),
             html.Div(id="slider-valor-visible", className="text-center text-muted small py-1")
         ])),

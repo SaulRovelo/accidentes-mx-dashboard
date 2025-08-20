@@ -11,5 +11,5 @@ def get_radio_tipo_evento(df):
         options=opciones,
         value="Todos",
         inline=True,
-        className="mt-2"
+        className="radio-negro mt-2"
     )

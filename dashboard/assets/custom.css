@@ -63,3 +63,18 @@ body { background:#f3f4f6; }
 .slider-negro .rc-slider-rail {
     background-color: #cbd5e1; /* gris claro */
 }
+
+/* Estilo negro para los radio buttons */
+.radio-negro .form-check-input:checked {
+    background-color: black;
+    border-color: black;
+}
+
+.radio-negro .form-check-input {
+    border-color: black;
+}
+
+.radio-negro .form-check-label {
+    color: #1f1f1f;
+    font-weight: 500;
+}

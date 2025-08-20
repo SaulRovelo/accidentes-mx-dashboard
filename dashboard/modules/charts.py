@@ -58,28 +58,85 @@ def fig_accidentes_por_mes(df: pd.DataFrame):
 
 
 # ---------- Mapa de incidentes (usa paleta para tipo_evento) ----------
+# dashboard/modules/charts.py
+from typing import Optional
+import pandas as pd
+
 def fig_mapa_incidentes(df: pd.DataFrame):
+    import plotly.express as px
+    import plotly.graph_objects as go
+
+    # Validaciones básicas
     if df.empty or not {"latitud", "longitud"}.issubset(df.columns):
         return None
     m = df.dropna(subset=["latitud", "longitud"])
     if m.empty:
         return None
 
+    # 🎨 Colores fijos por categoría (leyenda estática)
+    COLOR_EVENTOS = {
+        "atropellado": "#f4a261",
+        "choque": "#04c1ab",
+        "derrapado": "#f3cd6e",
+        "caida de pasajero": "#C69BE2",
+        "volcadura": "#b5838d",
+        "caida de ciclista": "#8ecae6",
+    }
+    orden_tipos = list(COLOR_EVENTOS.keys())
+    FIG_H = 580  # Altura fija; el ancho lo determina el contenedor (dcc.Graph style={"width":"100%"})
+
+    # Figura base: siempre color por tipo_evento
     fig = px.scatter_mapbox(
-        m, lat="latitud", lon="longitud",
+        m,
+        lat="latitud",
+        lon="longitud",
         hover_name="tipo_evento",
         hover_data=["alcaldia", "fecha_evento", "personas_lesionadas", "personas_fallecidas"],
         color="tipo_evento",
-        color_discrete_sequence=PALETA,   # rotación por toda la paleta
-        zoom=10, height=580
+        color_discrete_map=COLOR_EVENTOS,
+        category_orders={"tipo_evento": orden_tipos},
+        height=FIG_H,
+        zoom=9.5,  # 👈 Deja el zoom tal cual
+        center=dict(lat=19.350, lon=-99.145),  # 👈 Centro CDMX
     )
-    fig.update_layout(mapbox_style=MAPBOX_STYLE, margin=dict(l=0, r=0, t=40, b=0))
-    return apply_base_layout(
-        fig,
-        title="Mapa de incidentes",
-        subtitle="Distribución geográfica de siniestros viales (CDMX, 2024).",
-        height=580, margins=(0,0,64,0)
+
+    # Trazas fantasma para que la leyenda muestre TODAS las categorías
+    presentes = set(m["tipo_evento"].dropna().unique())
+    for t in (t for t in orden_tipos if t not in presentes):
+        fig.add_trace(go.Scattermapbox(
+            lat=[None], lon=[None],
+            mode="markers",
+            marker=dict(color=COLOR_EVENTOS[t], size=8),
+            name=t,
+            hoverinfo="skip",
+            showlegend=True
+        ))
+
+    # Layout: leyenda compacta y esquina superior derecha; sin width (responsivo por contenedor)
+    fig.update_layout(
+        autosize=True,          # el ancho lo controla la tarjeta
+        height=FIG_H,
+        uirevision="mapa_cdmx", # congela la vista entre callbacks
+        margin=dict(l=0, r=0, t=40, b=0),
+        mapbox=dict(
+            style="carto-positron",
+            zoom=9.5,
+            center=dict(lat=19.350, lon=-99.145),
+        ),
+        showlegend=True,
+        legend=dict(
+            title=None,                                # leyenda más pequeña
+            x=0.985, y=0.99, xanchor="right", yanchor="top",
+            bgcolor="rgba(255,255,255,0.90)",
+            bordercolor="rgba(0,0,0,0.15)", borderwidth=1,
+            font=dict(size=11),                        # 👈 más compacta
+            itemsizing="trace",  # 👈 Usa el tamaño de los trazos (más pequeño)
+           
+        ),
     )
+
+    return fig
+
 
 
 # ---------- Distribución por tipo de evento (nueva) ----------
