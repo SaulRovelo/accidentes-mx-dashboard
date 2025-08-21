@@ -59,3 +59,4 @@ COLOR_EVENTOS = {
     "desconocido":       "#CBD5E1",  # gris neutro
     "otros":             "#E5E7EB",  # gris muy claro (bajo énfasis)
 }
+

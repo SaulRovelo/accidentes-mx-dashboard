@@ -555,7 +555,9 @@ def fig_accidentes_por_mes(df: pd.DataFrame):
     return apply_base_layout(
         fig,
         title=" ",
-        height=380, margins=(26, 20, 20, 50)
+        height=800,                   # 👈 un poco más alto
+                    # 👈 más alto
+        margins=(120, 60, 100, 70)# 👈 márgenes ajustados
     )
 
 
@@ -690,4 +692,4 @@ def fig_eventos_por_tipo(df: pd.DataFrame):
     fig.update_layout(bargap=0.20, showlegend=False,
                       uniformtext_minsize=10, uniformtext_mode="hide")
 
-    return apply_base_layout(fig, title=" ", height=460, margins=(28, 18, 44, 24))
+    return apply_base_layout(fig, title=" ", height=800,  margins=(120, 60, 80, 70))

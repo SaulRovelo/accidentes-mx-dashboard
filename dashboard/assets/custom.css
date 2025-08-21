@@ -96,3 +96,14 @@ h4 { margin: 0; font-weight: 600; }
 .radio-negro .form-check-label { color: #1f2937; }
 .slider-negro .rc-slider-handle { border-color: #334155; }
 .slider-negro .rc-slider-track { background-color: #64748b; }
+
+
+/* Centrar gráficos específicos */
+.center-graph{
+  width: 92%;
+  max-width: 720px;
+  margin: 0 auto;         /* centra horizontalmente */
+}
+
+/* Compactar un poco el padding vertical de ciertas cards */
+.card-compact .card-body{ padding-top: .75rem; padding-bottom: .75rem; }

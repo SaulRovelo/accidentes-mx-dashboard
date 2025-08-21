@@ -188,17 +188,24 @@ def card_les_vs_fall(df):
 # --- CARD: Accidentes por mes ---
 def card_mes(df):
     return dbc.Card([
-        dbc.CardHeader(html.Div([html.H4("Accidentes por mes"),
-                                 html.Div("Tendencia mensual de reportes en 2024.", className="subtitle")]),
-                       style={"backgroundColor": "#f8f9fa"}),
+        dbc.CardHeader(html.Div([
+            html.H4("Accidentes por mes"),
+            html.Div("Tendencia mensual de reportes en 2024.", className="subtitle")
+        ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
-            dcc.Graph(figure=fig_accidentes_por_mes(df),
-                      className="plot-container",
-                      config={"displayModeBar": False, "responsive": True},
-                      style={"height": "460px"})
+            dcc.Graph(
+                figure=fig_accidentes_por_mes(df),
+                className="plot-container",
+                config={"displayModeBar": False, "responsive": True},
+                style={
+                    "height": "520px",
+                    "width": "90%",      # 👈 hace que no ocupe todo el ancho
+                    "maxWidth": "700px", # 👈 ancho máximo controlado
+                    "margin": "0 auto"   # 👈 centra horizontalmente
+                }
+            )
         ])
     ], className="card-plot h-100")
-
 
 ## fallecidos por alcaldia
 
@@ -206,6 +213,7 @@ def card_mes(df):
 # dashboard/modules/layouts.py (fragmento)
 from .filters.fallecidos_filters import slider_min_fallecidos
 
+# --- CARD: Fallecidos por alcaldía ---
 def card_fallecidos_alcaldia(df):
     rango = (df.dropna(subset=["alcaldia","personas_fallecidas"])
                .groupby("alcaldia")["personas_fallecidas"].sum())
@@ -222,27 +230,35 @@ def card_fallecidos_alcaldia(df):
         dbc.CardBody([
             dcc.Graph(
                 id="fallecidos-alcaldia-figure",
-                figure=fig_fallecidos_por_alcaldia(df, min_val),  # si tu fig acepta el umbral
+                figure=fig_fallecidos_por_alcaldia(df, min_val),
                 className="plot-container",
                 config={"displayModeBar": False, "responsive": True},
-                style={"height": "600px"}
+                style={"height": "480px"}                # << reduce altura de esta tarjeta
             )
         ])
-    ], className="card-plot h-100")
+    ], className="card-plot card-compact h-100")
+
 
 
 # --- CARD: Tipo de evento ---
 def card_tipo_evento(df):
     return dbc.Card([
-        dbc.CardHeader(html.Div([html.H4("Distribución por tipo de evento"),
-                                 html.Div("Volumen de reportes por categoría (colores consistentes con el mapa).",
-                                          className="subtitle")]),
-                       style={"backgroundColor": "#f8f9fa"}),
+        dbc.CardHeader(html.Div([
+            html.H4("Distribución por tipo de evento"),
+            html.Div("Volumen de reportes por categoría (colores consistentes con el mapa).",
+                     className="subtitle")
+        ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
-            dcc.Graph(figure=fig_eventos_por_tipo(df),
-                      className="plot-container",
-                      config={"displayModeBar": False, "responsive": True},
-                      style={"height": "460px"})
+            dcc.Graph(
+                figure=fig_eventos_por_tipo(df),
+                className="plot-container",
+                config={"displayModeBar": False, "responsive": True},
+                style={
+                    "height": "520px",
+                    "width": "90%",
+                    "maxWidth": "700px",
+                    "margin": "0 auto"   # 👈 centrado
+                }
+            )
         ])
     ], className="card-plot h-100")
-
