@@ -199,13 +199,9 @@ def card_mes(df):
         ])
     ], className="card-plot h-100")
 
-from .filters.fallecidos_filters import slider_min_fallecidos
 
+## fallecidos por alcaldia
 
-# modules/layouts.py
-from .filters.fallecidos_filters import slider_min_fallecidos  # 👈 importa tu slider
-
-from .filters.fallecidos_filters import slider_min_fallecidos
 
 # dashboard/modules/layouts.py (fragmento)
 from .filters.fallecidos_filters import slider_min_fallecidos

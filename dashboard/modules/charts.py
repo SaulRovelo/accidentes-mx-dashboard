@@ -562,51 +562,67 @@ def fig_accidentes_por_mes(df: pd.DataFrame):
 
 
 # ---------- Barras: fallecidos por alcaldía ----------
+import plotly.graph_objects as go
+import plotly.express as px
+import pandas as pd
+from .theme import TEMPLATE, FONT_FAMILY
+
+
 def fig_fallecidos_por_alcaldia(df: pd.DataFrame, min_fallecidos: int = 0):
-    if df.empty or not {"alcaldia","personas_fallecidas"}.issubset(df.columns):
+    if df.empty or not {"alcaldia", "personas_fallecidas"}.issubset(df.columns):
         return px.bar(title="Sin datos para mostrar", template=TEMPLATE)
 
-    tmp = (df.dropna(subset=["alcaldia","personas_fallecidas"])
-             .groupby("alcaldia")["personas_fallecidas"].sum()
-             .reset_index())
+    # 1) Agregación completa y máximo global (antes de filtrar)
+    base_grp = (df.dropna(subset=["alcaldia", "personas_fallecidas"])
+                  .groupby("alcaldia")["personas_fallecidas"].sum()
+                  .reset_index())
+    max_global = int(base_grp["personas_fallecidas"].max())
 
-    # aplica umbral del slider
-    tmp = tmp[tmp["personas_fallecidas"] >= int(min_fallecidos)]
+    # 2) Umbral del slider
+    tmp = base_grp[base_grp["personas_fallecidas"] >= int(min_fallecidos)]
     if tmp.empty:
         fig = px.bar(title="Sin datos con el umbral seleccionado", template=TEMPLATE)
-        return apply_base_layout(fig, title=" ", height=520, margins=(34,18,40,130))
+        return apply_base_layout(fig, title=" ", height=520, margins=(34, 18, 40, 130))
 
-    # orden ascendente para barras horizontales
+    # 3) Orden ascendente para barras horizontales
     tmp = tmp.sort_values("personas_fallecidas", ascending=True).reset_index(drop=True)
 
-    # paleta secuencial sobria
-    base = ["#E7EEF6","#CBDCEA","#AFCADF","#93B8D3","#7696B9","#5A78A0","#2F6AA3"]
-    colores = [base[min(i, len(base)-1)] for i in range(len(tmp))]
+    # 4) Escala continua fija: más oscuro = más fallecidos
+    escala = [
+        [0.00, "#E7EEF6"], [0.16, "#CBDCEA"], [0.33, "#AFCADF"],
+        [0.50, "#93B8D3"], [0.66, "#7696B9"], [0.83, "#5A78A0"], [1.00, "#2F6AA3"],
+    ]
 
     fig = go.Figure(go.Bar(
-        y=tmp["alcaldia"], x=tmp["personas_fallecidas"], orientation="h",
-        marker_color=colores,
-        text=tmp["personas_fallecidas"], texttemplate="%{text:,}",
-        textposition="outside", cliponaxis=False,
+        y=tmp["alcaldia"],
+        x=tmp["personas_fallecidas"],
+        orientation="h",
+        marker=dict(
+            color=tmp["personas_fallecidas"],
+            colorscale=escala,
+            cmin=0,
+            cmax=max_global,     # anclado al máximo global
+            showscale=False      # ✅ dentro de marker (evita el error)
+        ),
+        text=tmp["personas_fallecidas"],
+        texttemplate="%{text:,}",
+        textposition="outside",
+        cliponaxis=False,
         hovertemplate="<b>%{y}</b><br>Fallecidos: %{x:,}<extra></extra>"
     ))
 
     # Ejes
     fig.update_yaxes(categoryorder="array", categoryarray=list(tmp["alcaldia"]))
-    max_x = int(tmp["personas_fallecidas"].max())
     fig.update_xaxes(
         title="Fallecidos",
         ticks="outside",
         showgrid=True, gridcolor="#eef2f7",
-        tick0=0, dtick=10,              # ticks cada 10
-        range=[0, max_x]                # hasta el máximo real (p.ej., 125)
+        tick0=0, dtick=10,
+        range=[0, max_global]  # rango estable
     )
 
-    # Texto uniforme y proporción
     fig.update_layout(uniformtext_minsize=10, uniformtext_mode="hide")
-
-    return apply_base_layout(fig, title=" ", height=520, margins=(34,18,40,130))
-
+    return apply_base_layout(fig, title=" ", height=520, margins=(34, 18, 40, 130))
 
 # ---------- Distribución por tipo de evento (nueva) ----------
 # --- charts.py : Distribución por tipo de evento (versión funcional y robusta) ---
