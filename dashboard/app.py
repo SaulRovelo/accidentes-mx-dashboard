@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 
 from modules.data import load_data
 from modules.theme import DATOS_FUENTE_URL
-from modules.charts import fig_mapa_incidentes, fig_treemap_accidentes_por_alcaldia
+from modules.charts import fig_mapa_incidentes, fig_treemap_accidentes_por_alcaldia, fig_heatmap_hora_dia
 from modules.layouts import (
     card_mapa, card_treemap, card_prioridad, card_hora, card_heatmap,
     card_fallecidos_mes, card_mes, card_fallecidos_alcaldia,
@@ -74,6 +74,16 @@ def actualizar_treemap(min_acc):
 )
 def mostrar_valor_slider(min_acc):
     return f"Mostrando alcaldías con al menos {int(min_acc):,} accidentes."
+
+# --- app.py (añade este callback junto a los otros) ---
+@app.callback(
+    Output("heatmap-figure", "figure"),
+    Input("rng-horas", "value"),
+    Input("radio-dia-scope", "value")
+)
+def actualizar_heatmap(rango_horas, dia_scope):
+    h0, h1 = rango_horas
+    return fig_heatmap_hora_dia(df, horas=(h0, h1), dia_scope=dia_scope)
 
 # --- Main ---
 if __name__ == "__main__":

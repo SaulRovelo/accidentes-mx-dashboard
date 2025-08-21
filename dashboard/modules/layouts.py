@@ -112,16 +112,44 @@ def card_hora(df):
 
 
 # --- CARD: Heatmap hora vs día ---
+# layouts.py
 def card_heatmap(df):
+    marks_12h = {h: f"{12 if h % 12 == 0 else h % 12} {'AM' if h < 12 else 'PM'}"
+                 for h in range(0, 24, 2)}
     return dbc.Card([
         dbc.CardHeader(html.Div([
             html.H4("Accidentes por hora y día"),
-            html.Div("Mapa de calor por franja horaria y día de la semana.", className="subtitle")
+            html.Div("Mapa de calor por franja horaria y día de la semana.", className="subtitle"),
+            dbc.Row([
+                dbc.Col(dbc.RadioItems(
+                    id="radio-dia-scope",
+                    options=[
+                        {"label": "Todos", "value": "todos"},
+                        {"label": "Lunes–Viernes", "value": "laborales"},
+                        {"label": "Fin de semana", "value": "fin"},
+                    ],
+                    value="todos", inline=True, className="radio-negro mt-2"
+                ), width=12),
+            ], className="g-2"),
+            html.Div("Rango de horas", className="text-muted small mt-2"),
+            dcc.RangeSlider(
+                id="rng-horas", min=0, max=23, step=1, value=[0, 23],
+                marks=marks_12h, tooltip={"always_visible": False},
+                className="slider-negro mt-1"
+            ),
         ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
-            dcc.Graph(figure=fig_heatmap_hora_dia(df), className="plot-container")
+            dcc.Graph(
+                id="heatmap-figure",
+                figure=fig_heatmap_hora_dia(df),
+                className="plot-container",
+                config={"displayModeBar": False, "responsive": True},
+                style={"height": "440px"}  # ~20px extra vs height del fig para evitar cortes
+            )
         ])
     ], className="card-plot")
+
+
 
 # --- CARD: Donut de fallecidos por mes ---
 def card_fallecidos_mes(df):

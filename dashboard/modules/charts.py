@@ -257,30 +257,88 @@ def fig_accidentes_por_hora(df: pd.DataFrame):
     )
 
 # ---------- Heatmap hora × día ----------
-def fig_heatmap_hora_dia(df: pd.DataFrame):
+def fig_heatmap_hora_dia(
+    df: pd.DataFrame,
+    horas: tuple[int, int] = (0, 23),   # (inicio, fin) en 0..23
+    dia_scope: str = "todos"            # "todos" | "laborales" | "fin"
+):
+    import numpy as np
+    import plotly.express as px
+
     if df.empty or not {"hora", "dia_semana_nombre"}.issubset(df.columns):
         return px.imshow([[0]*24]*7, x=list(range(24)), y=DIAS_SEMANA,
                          title="Sin datos para construir el heatmap", template=TEMPLATE)
 
-    df["hora"] = df["hora"].astype("Int64").clip(0, 23)
+    # --- Normaliza filtros ---
+    h_ini, h_fin = map(int, horas)
+    if h_ini > h_fin:
+        h_ini, h_fin = h_fin, h_ini
+    h_ini = max(0, min(23, h_ini))
+    h_fin = max(0, min(23, h_fin))
+
+    scope = {
+        "todos": DIAS_SEMANA,
+        "laborales": DIAS_SEMANA[:5],  # Lunes–Viernes
+        "fin": DIAS_SEMANA[5:]         # Sábado–Domingo
+    }
+    dias_sel = scope.get(dia_scope, DIAS_SEMANA)
+
+    # --- Tabla 7×(horas) ---
+    df2 = df.copy()
+    df2["hora"] = df2["hora"].astype("Int64").clip(0, 23)
+    df2 = df2[df2["hora"].between(h_ini, h_fin) & df2["dia_semana_nombre"].isin(dias_sel)]
     tabla = (
-        df.pivot_table(index="dia_semana_nombre", columns="hora", values="tipo_evento",
-                       aggfunc="count", fill_value=0)
-        .reindex(index=DIAS_SEMANA, columns=list(range(24)), fill_value=0)
+        df2.pivot_table(index="dia_semana_nombre", columns="hora",
+                        values="tipo_evento", aggfunc="count", fill_value=0)
+           .reindex(index=dias_sel, columns=list(range(h_ini, h_fin + 1)), fill_value=0)
     )
+
+   
+    azul_suave = [
+    "#FBFDB0", "#FEC287", "#FB8761", "#E55964",
+    "#B5367A", "#8C2981", "#59106E", "#1F0A3A", "#000004"
+]
     fig = px.imshow(
-        tabla.values, x=tabla.columns, y=tabla.index,
-        labels=dict(x="Hora del día", y="Día de la semana", color="Accidentes"),
+        tabla.values,
+        x=tabla.columns,      # horas seleccionadas
+        y=tabla.index,        # días seleccionados
+        #labels=dict(x="Hora del día", y="Día de la semana", color="Accidentes"),
         template=TEMPLATE,
-        color_continuous_scale="YlGnBu"
+        color_continuous_scale=azul_suave,
+        aspect="auto"         # evita formato cuadrado (se adapta al ancho del contenedor)
     )
-    fig.update_xaxes(type="category")
-    return apply_base_layout(
-        fig,
-        title="Accidentes por hora y día",
-        subtitle="Mapa de calor para identificar franjas horarias y días con mayor incidencia.",
-        height=430, margins=(40,20,64,30)
+
+    # Separación sutil entre celdas
+    fig.update_traces(xgap=1.0, ygap=2.0)
+
+    # --- Eje X en 12 h y hover claro ---
+    def _fmt12(h): return f"{12 if h % 12 == 0 else h % 12} {'AM' if h < 12 else 'PM'}"
+    tickvals = list(tabla.columns)
+    ticktext = [_fmt12(h) for h in tickvals]
+    fig.update_traces(
+        customdata=np.tile(np.array(ticktext), (len(tabla.index), 1)),
+        hovertemplate="Día: %{y}<br>Hora: %{customdata}<br>Accidentes: %{z}<extra></extra>"
     )
+    fig.update_xaxes(tickmode="array", tickvals=tickvals, ticktext=ticktext, ticks="outside")
+    fig.update_yaxes(ticks="outside")
+
+    # --- Colorbar vertical y figura compacta ---
+    fig.update_layout(
+        height=420,  # más compacto
+        margin=dict(l=28, r=70, t=10, b=28),   # margen derecho para colorbar
+        coloraxis_colorbar=dict(
+            title="Accidentes",
+            orientation="v",   # vertical a la derecha
+            x=1.02, xanchor="left",
+            y=0.5, yanchor="middle",
+            len=0.80,          # tamaño proporcional
+            thickness=12,      # delgado
+            outlinecolor="rgba(0,0,0,0.15)", outlinewidth=1
+        ),
+        font=dict(family=FONT_FAMILY, size=14, color="#111827"),
+        showlegend=False
+    )
+    return fig
 
 
 # ---------- Treemap por alcaldía ----------
