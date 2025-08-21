@@ -41,6 +41,7 @@ def card_mapa(df):
     ], className="card-plot", style={"height": "700px"})
 
 # --- CARD: Treemap de accidentes por alcaldía ---
+# --- CARD: Treemap de accidentes por alcaldía ---
 def card_treemap(df, min_acc, max_acc):
     return dbc.Card([
         dbc.CardHeader(html.Div([
@@ -54,11 +55,17 @@ def card_treemap(df, min_acc, max_acc):
                 id="treemap-figure",
                 figure=fig_treemap_accidentes_por_alcaldia(df, min_acc),
                 className="plot-container",
-                config={"responsive": True},
-                style={"height": "500px"}
+                config={"responsive": False},             # 👈 evita re-cálculo de tamaño
+                style={
+                    "width": "90%",                       # 👈 igual que el mapa
+                    "maxWidth": "700px",
+                    "height": "520px",
+                    "margin": "0 auto"
+                }
             )
         ])
     ], className="card-plot", style={"height": "700px"})
+
 
 # --- CARD: Distribución de prioridad de atención ---
 # --- layouts.py (solo el Graph de card_prioridad para asegurar centrado) ---

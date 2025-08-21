@@ -257,7 +257,7 @@ def fig_treemap_accidentes_por_alcaldia(df: pd.DataFrame, min_acc: int = 0):
     title=None,
     paper_bgcolor="white",
     plot_bgcolor="white",
-    margin=dict(t=0, l=0, r=0, b=0),
+    #margin=dict(t=0, l=0, r=0, b=0),
     coloraxis_colorbar=dict(
         title="Accidentes",
         tickmode="array",
@@ -281,7 +281,7 @@ def fig_treemap_accidentes_por_alcaldia(df: pd.DataFrame, min_acc: int = 0):
         fig,
         title="",
         subtitle=None,
-        height=520,
+        height=505,
         margins=(20, 0, 20, 20)
     )
 
