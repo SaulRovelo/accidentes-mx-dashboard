@@ -100,9 +100,16 @@ def card_hora(df):
             html.Div("Picos en horarios laborales y fines de semana.", className="subtitle")
         ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
-            dcc.Graph(figure=fig_accidentes_por_hora(df), className="plot-container")
+            dcc.Graph(
+                figure=fig_accidentes_por_hora(df),
+                className="plot-container",
+                config={"displayModeBar": False, "responsive": True},
+                style={"height": "430px"}
+            )
         ])
     ], className="card-plot")
+
+
 
 # --- CARD: Heatmap hora vs día ---
 def card_heatmap(df):

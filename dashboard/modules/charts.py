@@ -7,22 +7,29 @@ from .theme import (
 )
 
 # ---------- Helper de layout consistente ----------
-def apply_base_layout(fig, title, subtitle=None, height=420, margins=(24,20,68,28)):
-    """
-    Aplica estilo global coherente a cualquier figura de Plotly.
-    - Título alineado a la izquierda
-    - Leyenda horizontal arriba
-    - Márgenes amplios para evitar que el subtítulo/etiquetas se encimen
-    """
+def apply_base_layout(fig, title, subtitle=None, height=420, margins=(24,20,64,28)):
     fig.update_layout(
-        template=TEMPLATE,
+        template=TEMPLATE,  # plotly_white
         title=dict(text=title, x=0.0, xanchor="left"),
         height=height,
         margin=dict(l=margins[0], r=margins[1], t=margins[2], b=margins[3]),
-        font=dict(family=FONT_FAMILY, size=14, color="#ffffff"),
+        font=dict(family=FONT_FAMILY, size=14, color="#111827"),
         paper_bgcolor="#ffffff",
         plot_bgcolor="#ffffff",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        # 👇 Sin rejilla (no “cuadriculado”), solo líneas de eje discretas
+        xaxis=dict(
+            showgrid=False,
+            showline=True, linecolor="#cbd5e1", linewidth=1,
+            ticks="outside", tickcolor="#cbd5e1", ticklen=5
+        ),
+        yaxis=dict(
+            showgrid=False,  # si prefieres horizontales muy sutiles: True con gridcolor="#f1f5f9"
+            zeroline=False,
+            showline=True, linecolor="#cbd5e1", linewidth=1,
+            ticks="outside", tickcolor="#cbd5e1", ticklen=5
+        ),
+        bargap=0.18
     )
     if subtitle:
         fig.add_annotation(
@@ -30,6 +37,8 @@ def apply_base_layout(fig, title, subtitle=None, height=420, margins=(24,20,68,2
             xref="paper", yref="paper", x=0.0, y=1.12, showarrow=False, align="left"
         )
     return fig
+
+
 
 
 # ---------- Accidentes por mes ----------
@@ -166,26 +175,45 @@ def fig_eventos_por_tipo(df: pd.DataFrame):
 
 
 # ---------- Accidentes por hora ----------
+def _ticks_12h():
+    # 0..23  ->  ["12 AM","1 AM",...,"11 PM"]
+    etiquetas = []
+    for h in range(24):
+        h12 = 12 if h % 12 == 0 else h % 12
+        suf = "AM" if h < 12 else "PM"
+        etiquetas.append(f"{h12} {suf}")
+    return list(range(24)), etiquetas
+
 def fig_accidentes_por_hora(df: pd.DataFrame):
     if df.empty or "hora" not in df.columns:
         return px.bar(title="Sin datos para mostrar", template=TEMPLATE)
 
-    tmp = df["hora"].astype(int).value_counts().reindex(range(24), fill_value=0).reset_index()
+    tmp = df["hora"].astype("Int64").clip(0, 23).value_counts().reindex(range(24), fill_value=0).reset_index()
     tmp.columns = ["hora", "accidentes"]
 
     fig = px.bar(
         tmp, x="hora", y="accidentes",
-        labels={"hora": "Hora (0–23)", "accidentes": "Accidentes"},
-        color_discrete_sequence=[PALETA[1]],
+        labels={"hora": "Hora", "accidentes": "Accidentes"},
+        color_discrete_sequence=["#38C1F7"],   
         template=TEMPLATE,
-        text="accidentes"
+        text=None  # más limpio; si quieres números, usa "accidentes"
     )
-    fig.update_layout(xaxis=dict(dtick=1))
-    fig.update_traces(textposition="outside")
+
+    tickvals, ticktext = _ticks_12h()
+    fig.update_layout(
+        xaxis=dict(dtick=1, tickmode="array", tickvals=tickvals, ticktext=ticktext),
+        yaxis=dict(tickformat=",d"),  # miles con separador
+    )
+    fig.update_traces(
+        marker=dict(line=dict(color="rgba(0,0,0,.15)", width=1)),
+        hovertemplate="Hora %{x}<br>Accidentes: %{y:,}<extra></extra>"
+        # textposition="outside"  # <- activa si decides mostrar valores
+    )
+
     return apply_base_layout(
         fig,
-        title="Accidentes por hora",
-        subtitle="Distribución por hora; observa picos en horarios laborales y fines de semana.",
+        title=" ",
+        #subtitle="Distribución por hora; observa picos en horarios laborales y fines de semana.",
         height=430, margins=(30,20,64,30)
     )
 
