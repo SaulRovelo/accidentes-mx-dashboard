@@ -104,7 +104,7 @@ def card_hora(df):
                 figure=fig_accidentes_por_hora(df),
                 className="plot-container",
                 config={"displayModeBar": False, "responsive": True},
-                style={"height": "430px"}
+                style={"height": "545px"}
             )
         ])
     ], className="card-plot")
