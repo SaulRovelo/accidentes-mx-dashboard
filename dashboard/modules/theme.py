@@ -56,3 +56,16 @@ COLOR_EVENTOS = {
     "volcadura": "#E76F51",
     "desconocido": "#9CA3AF",
 }
+
+
+# Colores fijos por tipo de evento (paleta nueva)
+COLOR_EVENTOS = {
+    "choque":            "#4202F2",  # indigo/acento (más oscuro)
+    "derrapado":         "#5568FA",  # azul principal (como Accidentes por mes)
+    "atropellado":       "#6780FF",  # azul medio
+    "caida de ciclista": "#7E95FF",  # azul medio-claro
+    "caida de pasajero": "#9AADFF",  # azul claro
+    "volcadura":         "#B8C4FF",  # azul muy claro
+    "desconocido":       "#CBD5E1",  # gris neutro
+    "otros":             "#E5E7EB",  # gris muy claro (bajo énfasis)
+}

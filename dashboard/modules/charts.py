@@ -570,11 +570,13 @@ def fig_fallecidos_por_alcaldia(df: pd.DataFrame, min_fallecidos: int = 0):
              .groupby("alcaldia")["personas_fallecidas"].sum()
              .reset_index())
 
+    # aplica umbral del slider
     tmp = tmp[tmp["personas_fallecidas"] >= int(min_fallecidos)]
     if tmp.empty:
         fig = px.bar(title="Sin datos con el umbral seleccionado", template=TEMPLATE)
         return apply_base_layout(fig, title=" ", height=520, margins=(34,18,40,130))
 
+    # orden ascendente para barras horizontales
     tmp = tmp.sort_values("personas_fallecidas", ascending=True).reset_index(drop=True)
 
     # paleta secuencial sobria
@@ -583,66 +585,93 @@ def fig_fallecidos_por_alcaldia(df: pd.DataFrame, min_fallecidos: int = 0):
 
     fig = go.Figure(go.Bar(
         y=tmp["alcaldia"], x=tmp["personas_fallecidas"], orientation="h",
-        marker_color=colores, text=tmp["personas_fallecidas"], texttemplate="%{text:,}",
+        marker_color=colores,
+        text=tmp["personas_fallecidas"], texttemplate="%{text:,}",
         textposition="outside", cliponaxis=False,
         hovertemplate="<b>%{y}</b><br>Fallecidos: %{x:,}<extra></extra>"
     ))
 
+    # Ejes
     fig.update_yaxes(categoryorder="array", categoryarray=list(tmp["alcaldia"]))
     max_x = int(tmp["personas_fallecidas"].max())
-    fig.update_xaxes(title="Fallecidos", ticks="outside", showgrid=True, gridcolor="#eef2f7",
-                     tick0=0, dtick=10, range=[0, max_x])
+    fig.update_xaxes(
+        title="Fallecidos",
+        ticks="outside",
+        showgrid=True, gridcolor="#eef2f7",
+        tick0=0, dtick=10,              # ticks cada 10
+        range=[0, max_x]                # hasta el máximo real (p.ej., 125)
+    )
 
+    # Texto uniforme y proporción
     fig.update_layout(uniformtext_minsize=10, uniformtext_mode="hide")
+
     return apply_base_layout(fig, title=" ", height=520, margins=(34,18,40,130))
 
 
 # ---------- Distribución por tipo de evento (nueva) ----------
-# --- charts.py ---
-import plotly.graph_objects as go
+# --- charts.py : Distribución por tipo de evento (versión funcional y robusta) ---
+from typing import Optional
+import unicodedata
+import pandas as pd
 import plotly.express as px
-
-import plotly.express as px
 import plotly.graph_objects as go
 
-# Helper para encontrar la columna de "tipo de evento"
+# ---------------------------------------------------------------------
+# Helper para encontrar la columna de "tipo de evento" (tu versión actual)
 def _col_tipo_evento(df: pd.DataFrame) -> str | None:
-    candidatos = [
-        "tipo_evento", "tipoEvento", "tipo_evento_nombre",
-        "tipo_incidente", "tipo", "evento", "incidente"
-    ]
+    candidatos = ["tipo_evento","tipoEvento","tipo_evento_nombre",
+                  "tipo_incidente","tipo","evento","incidente"]
     for c in candidatos:
         if c in df.columns:
             return c
-    # heurística: alguna columna que contenga "tipo" o "evento"
     for c in df.columns:
-        cn = c.lower()
+        cn = str(c).lower()
         if ("tipo" in cn and ("evento" in cn or "incidente" in cn)) or cn in {"evento","incidente"}:
             return c
     return None
 
+# --- Distribución por tipo de evento (vertical, simple, paleta nueva) ---
+import plotly.graph_objects as go
+import plotly.express as px
+
 def fig_eventos_por_tipo(df: pd.DataFrame):
-    if df.empty: return px.bar(title="Sin datos para mostrar", template=TEMPLATE)
+    if df.empty:
+        return px.bar(title="Sin datos para mostrar", template=TEMPLATE)
 
     col = _col_tipo_evento(df)
-    if not col: return px.bar(title="No se encontró la columna de tipo de evento", template=TEMPLATE)
+    if not col:
+        return px.bar(title="No se encontró la columna de tipo de evento", template=TEMPLATE)
 
-    tmp = (df[col].fillna("Desconocido").astype(str).str.strip()
-               .value_counts().reset_index())
+    # Conteo directo y orden de mayor a menor (value_counts ya devuelve desc)
+    tmp = (
+        df[col].fillna("Desconocido").astype(str).str.strip()
+          .value_counts()
+          .reset_index()
+    )
     tmp.columns = ["tipo_evento","accidentes"]
 
+    # Colores fijos (paleta nueva)
     from .theme import COLOR_EVENTOS
-    colores = [COLOR_EVENTOS.get(cat.lower(), COLOR_EVENTOS["desconocido"])
+    colores = [COLOR_EVENTOS.get(str(cat).lower(), COLOR_EVENTOS["desconocido"])
                for cat in tmp["tipo_evento"]]
 
     fig = go.Figure(go.Bar(
-        x=tmp["tipo_evento"], y=tmp["accidentes"],
+        x=tmp["tipo_evento"],
+        y=tmp["accidentes"],
         marker_color=colores,
-        text=tmp["accidentes"], texttemplate="%{text:,}",
-        textposition="outside", cliponaxis=False,
-        hovertemplate="<b>%{x}</b><br>Accidentes: %{y:,}<extra></extra>"
+        text=tmp["accidentes"],
+        texttemplate="%{text:,}",
+        textposition="outside",
+        cliponaxis=False,
+        hovertemplate="<b>%{x}</b><br>Accidentes: %{y:,}<extra></extra>",
     ))
-    fig.update_xaxes(tickangle=12, automargin=True)
-    fig.update_yaxes(title="Accidentes")
-    fig.update_layout(bargap=0.18, showlegend=False)
-    return apply_base_layout(fig, title=" ", height=440, margins=(28,18,40,28))
+
+    # Ejes y estilo (como antes, solo afinado)
+    fig.update_xaxes(tickangle=14, automargin=True, ticks="outside")
+    fig.update_yaxes(title="Accidentes", ticks="outside",
+                     showgrid=True, gridcolor="#eef2f7")
+
+    fig.update_layout(bargap=0.20, showlegend=False,
+                      uniformtext_minsize=10, uniformtext_mode="hide")
+
+    return apply_base_layout(fig, title=" ", height=460, margins=(28, 18, 44, 24))

@@ -229,7 +229,7 @@ def card_fallecidos_alcaldia(df):
                 figure=fig_fallecidos_por_alcaldia(df, min_val),  # si tu fig acepta el umbral
                 className="plot-container",
                 config={"displayModeBar": False, "responsive": True},
-                style={"height": "520px"}
+                style={"height": "600px"}
             )
         ])
     ], className="card-plot h-100")
