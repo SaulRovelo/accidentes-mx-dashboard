@@ -176,7 +176,7 @@ def fig_eventos_por_tipo(df: pd.DataFrame):
 
 # ---------- Accidentes por hora ----------
 def _ticks_12h():
-    # 0..23  ->  ["12 AM","1 AM",...,"11 PM"]
+    """0..23  ->  ['12 AM','1 AM',...,'11 PM']"""
     etiquetas = []
     for h in range(24):
         h12 = 12 if h % 12 == 0 else h % 12
@@ -188,35 +188,73 @@ def fig_accidentes_por_hora(df: pd.DataFrame):
     if df.empty or "hora" not in df.columns:
         return px.bar(title="Sin datos para mostrar", template=TEMPLATE)
 
-    tmp = df["hora"].astype("Int64").clip(0, 23).value_counts().reindex(range(24), fill_value=0).reset_index()
+    # Conteo por hora 0..23
+    tmp = (
+        df["hora"].astype(int)
+          .value_counts()
+          .reindex(range(24), fill_value=0)
+          .reset_index()
+    )
     tmp.columns = ["hora", "accidentes"]
 
+    # Top 3 horas
+    top3 = tmp.nlargest(3, "accidentes").reset_index(drop=True)
+
+    # Gráfico base (color sobrio)
+    base_color = "#a1e4f1"
     fig = px.bar(
         tmp, x="hora", y="accidentes",
         labels={"hora": "Hora", "accidentes": "Accidentes"},
-        color_discrete_sequence=["#38C1F7"],   
+        color_discrete_sequence=[base_color],
         template=TEMPLATE,
-        text=None  # más limpio; si quieres números, usa "accidentes"
+        text=None  # más limpio; el dato aparece en el hover
     )
 
+    # Recolorear por-barra solo las 3 horas top
+    top_colors = ["#0003b6", "#265bd6", "#6fb2fe"]  # Top1, Top2, Top3
+    color_by_bar = [base_color] * len(tmp)
+
+    # Mapa Hora -> etiqueta '12 AM'..'11 PM' para ticks y hover
     tickvals, ticktext = _ticks_12h()
-    fig.update_layout(
-        xaxis=dict(dtick=1, tickmode="array", tickvals=tickvals, ticktext=ticktext),
-        yaxis=dict(tickformat=",d"),  # miles con separador
-    )
+    label_by_hour = {h: t for h, t in zip(tickvals, ticktext)}
+    # Customdata con la etiqueta AM/PM
+    custom_labels = tmp["hora"].map(label_by_hour)
+
+    # Asignar color y anotaciones
+    for rank in range(3):
+        h = int(top3.loc[rank, "hora"])
+        v = int(top3.loc[rank, "accidentes"])
+        idx = tmp.index[tmp["hora"] == h][0]
+        color_by_bar[idx] = top_colors[rank]
+        fig.add_annotation(
+            x=h, y=v,
+            text=f"{rank+1}",
+            showarrow=False, yshift=14,
+            font=dict(color="#000000", size=15)
+        )
+        
+
     fig.update_traces(
-        marker=dict(line=dict(color="rgba(0,0,0,.15)", width=1)),
-        hovertemplate="Hora %{x}<br>Accidentes: %{y:,}<extra></extra>"
-        # textposition="outside"  # <- activa si decides mostrar valores
+        marker_color=color_by_bar,
+        customdata=custom_labels,
+        hovertemplate="Hora %{customdata}<br>Accidentes: %{y:,}<extra></extra>"
     )
 
+    # Eje X en 12 h y layout limpio
+    fig.update_layout(
+        xaxis=dict(tickmode="array", tickvals=tickvals, ticktext=ticktext, dtick=1),
+        yaxis=dict(rangemode="tozero", title="Accidentes"),
+        bargap=0.18,
+        showlegend=False
+    )
+
+    # Si usas tu helper de layout global:
     return apply_base_layout(
         fig,
         title=" ",
-        #subtitle="Distribución por hora; observa picos en horarios laborales y fines de semana.",
-        height=430, margins=(30,20,64,30)
+        #subtitle="Top 3 horas resaltadas (formato 12 h).",
+        height=430, margins=(30, 20, 64, 30)
     )
-
 
 # ---------- Heatmap hora × día ----------
 def fig_heatmap_hora_dia(df: pd.DataFrame):
