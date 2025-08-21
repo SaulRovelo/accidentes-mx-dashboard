@@ -39,3 +39,20 @@ MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
 
 MESES_A_NUM = {m: i+1 for i, m in enumerate(MESES)}
 NUM_A_MESES = {v: k for k, v in MESES_A_NUM.items()}
+
+
+# --- Paletas para barras (monocromáticas sobrias)
+BARRAS_BASE = "#9DB7D5"      # azul grisáceo claro
+BARRAS_ACENTO = "#2F6AA3"    # acento para barra destacada
+BARRAS_SECUENCIAL = ["#E7EEF6","#CBDCEA","#AFCADF","#93B8D3","#7696B9","#5A78A0","#2F6AA3"]
+
+# --- Colores fijos por tipo de evento (coherentes con el mapa)
+COLOR_EVENTOS = {
+    "choque": "#2F6AA3",
+    "derrapado": "#2A9D8F",
+    "atropellado": "#F2C14E",
+    "caida de ciclista": "#475569",
+    "caida de pasajero": "#8896A6",
+    "volcadura": "#E76F51",
+    "desconocido": "#9CA3AF",
+}

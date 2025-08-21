@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 
 from modules.data import load_data
 from modules.theme import DATOS_FUENTE_URL
-from modules.charts import fig_mapa_incidentes, fig_treemap_accidentes_por_alcaldia, fig_heatmap_hora_dia
+from modules.charts import fig_mapa_incidentes, fig_treemap_accidentes_por_alcaldia, fig_heatmap_hora_dia,fig_fallecidos_por_alcaldia
 from modules.layouts import (
     card_mapa, card_treemap, card_prioridad, card_hora, card_heatmap,
     card_fallecidos_mes, card_mes, card_fallecidos_alcaldia,
@@ -46,8 +46,7 @@ app.layout = dbc.Container([
     dbc.Row([dbc.Col(card_prioridad(df), md=12)], className="mb-4"),
     dbc.Row([dbc.Col(card_hora(df), md=6), dbc.Col(card_heatmap(df), md=6)], className="mb-4"),
     dbc.Row([dbc.Col(card_fallecidos_mes(df), md=12)], className="mb-4"),
-    dbc.Row([dbc.Col(card_mes(df), md=6), dbc.Col(card_fallecidos_alcaldia(df), md=6)], className="mb-4"),
-    dbc.Row([dbc.Col(card_tipo_evento(df), md=12)], className="mb-4"),
+    dbc.Row([dbc.Col(card_mes(df), xs=12, md=4, lg=4), dbc.Col(card_fallecidos_alcaldia(df), xs=12, md=4, lg=4), dbc.Col(card_tipo_evento(df), xs=12, md=4, lg=4)], className="g-3 mb-4"),
     dbc.Row([dbc.Col(card_les_vs_fall(df), md=12)], className="mb-4"),
 ], fluid=True)
 
@@ -84,6 +83,20 @@ def mostrar_valor_slider(min_acc):
 def actualizar_heatmap(rango_horas, dia_scope):
     h0, h1 = rango_horas
     return fig_heatmap_hora_dia(df, horas=(h0, h1), dia_scope=dia_scope)
+
+# debajo de otros callbacks
+from modules.filters.fallecidos_filters import umbral_from_pos
+
+@app.callback(
+    Output("fallecidos-alcaldia-figure", "figure"),
+    Output("lbl-min-fallecidos", "children"),
+    Input("slider-min-fallecidos", "value")
+)
+def actualizar_fallecidos_alcaldia(pos):
+    umbral = int(umbral_from_pos(pos))              # 0..100 -> umbral real
+    fig = fig_fallecidos_por_alcaldia(df, min_fallecidos=umbral)
+    return fig, f"Mostrando alcaldías con ≥ {umbral:,} fallecidos."
+
 
 # --- Main ---
 if __name__ == "__main__":

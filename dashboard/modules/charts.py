@@ -41,30 +41,6 @@ def apply_base_layout(fig, title, subtitle=None, height=420, margins=(24,20,64,2
 
 
 
-# ---------- Accidentes por mes ----------
-def fig_accidentes_por_mes(df: pd.DataFrame):
-    if df.empty or "mes" not in df.columns:
-        return px.bar(title="Sin datos para el rango seleccionado", template=TEMPLATE)
-
-    tmp = df.groupby("mes").size().reset_index(name="accidentes")
-    tmp["mes_nombre"] = tmp["mes"].map(NUM_A_MESES)
-
-    fig = px.bar(
-        tmp, x="mes_nombre", y="accidentes",
-        category_orders={"mes_nombre": MESES},
-        labels={"mes_nombre": "Mes", "accidentes": "Accidentes"},
-        color_discrete_sequence=[PALETA[0]],
-        template=TEMPLATE,
-        text="accidentes"
-    )
-    fig.update_traces(textposition="outside")
-    return apply_base_layout(
-        fig,
-        title="Accidentes por mes",
-        subtitle="Tendencia mensual de siniestros viales (CDMX, 2024).",
-        height=430, margins=(30,20,64,30)
-    )
-
 
 # ---------- Mapa de incidentes (usa paleta para tipo_evento) ----------
 # dashboard/modules/charts.py
@@ -147,31 +123,6 @@ def fig_mapa_incidentes(df: pd.DataFrame):
     return fig
 
 
-
-# ---------- Distribución por tipo de evento (nueva) ----------
-def fig_eventos_por_tipo(df: pd.DataFrame):
-    if df.empty or "tipo_evento" not in df.columns:
-        return px.bar(title="Sin datos para mostrar", template=TEMPLATE)
-
-    tmp = df["tipo_evento"].value_counts().reset_index()
-    tmp.columns = ["tipo_evento", "accidentes"]
-
-    fig = px.bar(
-        tmp, x="tipo_evento", y="accidentes",
-        color="tipo_evento",               # usa paleta cualitativa completa
-        color_discrete_sequence=PALETA,
-        labels={"tipo_evento": "Tipo de evento", "accidentes": "Accidentes"},
-        template=TEMPLATE,
-        text="accidentes"
-    )
-    fig.update_traces(textposition="outside")
-    fig.update_xaxes(tickangle=0, automargin=True)
-    return apply_base_layout(
-        fig,
-        title="Distribución por tipo de evento",
-        subtitle="Volumen de reportes por categoría; colores consistentes con el mapa.",
-        height=430, margins=(28,20,64,36)
-    )
 
 
 # ---------- Accidentes por hora ----------
@@ -411,30 +362,7 @@ def fig_treemap_accidentes_por_alcaldia(df: pd.DataFrame, min_acc: int = 0):
 
 
 
-# ---------- Barras: fallecidos por alcaldía ----------
-def fig_fallecidos_por_alcaldia(df: pd.DataFrame):
-    if df.empty or not {"alcaldia", "personas_fallecidas"}.issubset(df.columns):
-        return px.bar(title="Sin datos para mostrar", template=TEMPLATE)
 
-    tmp = (
-        df.dropna(subset=["alcaldia", "personas_fallecidas"])
-          .groupby("alcaldia")["personas_fallecidas"].sum()
-          .sort_values(ascending=False).reset_index()
-    )
-    fig = px.bar(
-        tmp, x="alcaldia", y="personas_fallecidas",
-        labels={"alcaldia": "Alcaldía", "personas_fallecidas": "Fallecidos"},
-        color_discrete_sequence=[PALETA[2]],
-        template=TEMPLATE,
-        text="personas_fallecidas"
-    )
-    fig.update_traces(textposition="outside")
-    return apply_base_layout(
-        fig,
-        title="Fallecidos por alcaldía",
-        subtitle="Total registrado por demarcación durante 2024.",
-        height=430, margins=(30,20,64,30)
-    )
 
 
 # ---------- Pie: prioridad de atención (usa paleta cualitativa) ----------
@@ -489,25 +417,66 @@ def fig_prioridad_atencion(df: pd.DataFrame):
 
 
 # ---------- Donut: fallecidos por mes ----------
+# --- charts.py ---
 def fig_fallecidos_donut(df: pd.DataFrame):
     if df.empty or "mes" not in df.columns or "personas_fallecidas" not in df.columns:
         return px.pie(title="Sin datos para mostrar", template=TEMPLATE)
 
+    # Agregación y mapeo
     tmp = df.groupby("mes")["personas_fallecidas"].sum().reset_index()
     tmp["mes_nombre"] = tmp["mes"].map(NUM_A_MESES)
+    total = int(tmp["personas_fallecidas"].sum())
+
+    # Paleta cálida y estable por mes (Ene→Dic)
+    PALETA_DONUT_MESES = [
+        "#FDE6D6", "#F4C8B1", "#F7D8A9", "#F3E2AA",
+        "#DFF0B2", "#CBE7C8", "#BFE3DE", "#C8DFF2",
+        "#D5D2F5", "#E5C7EB", "#F7C6D4", "#F6D0B7"
+    ]
+    color_map = {nombre: c for nombre, c in zip(MESES, PALETA_DONUT_MESES)}
 
     fig = px.pie(
-        tmp, names="mes_nombre", values="personas_fallecidas",
-        hole=0.45, template=TEMPLATE,
+        tmp,
+        names="mes_nombre",
+        values="personas_fallecidas",
+        hole=0.55,
+        template=TEMPLATE,
+        category_orders={"mes_nombre": MESES},
         color="mes_nombre",
-        color_discrete_sequence=PALETA
+        color_discrete_map=color_map
     )
-    fig.update_traces(textinfo="label+percent")
+
+    # ✅ Todas las etiquetas afuera y SIN “pull” (ningún mes resaltado)
+    fig.update_traces(
+        sort=False,
+        textposition="outside",
+        textinfo="label+percent",
+        texttemplate="<b>%{label}</b><br>%{percent} — %{value:,}",
+        marker=dict(line=dict(color="white", width=2)),
+        pull=0,
+        hovertemplate="<b>%{label}</b><br>Fallecidos: %{value:,} (%{percent})<extra></extra>"
+    )
+
+    # Total anual al centro
+    fig.add_annotation(
+        x=0.5, y=0.5, showarrow=False, align="center",
+        text=f"<b>{total:,}</b><br><span style='color:#64748b'>Fallecidos</span>",
+        font=dict(family=FONT_FAMILY, size=16, color="#111827")
+    )
+
+    fig.update_layout(
+        showlegend=False,
+        margin=dict(l=30, r=30, t=10, b=20),
+        height=420,
+        uniformtext_minsize=10, uniformtext_mode="hide"
+    )
+
+    # Sin título interno (la card ya lo muestra)
     return apply_base_layout(
         fig,
-        title="Fallecidos por mes",
-        subtitle="Distribución mensual de víctimas fatales durante 2024.",
-        height=420, margins=(20,20,64,20)
+        title="",
+        subtitle=None,
+        height=420, margins=(20, 20, 64, 20)
     )
 
 
@@ -535,3 +504,145 @@ def fig_bubble_lesionados_vs_fallecidos_total(df: pd.DataFrame):
         subtitle="Relación acumulada de personas lesionadas y fallecidas en 2024.",
         height=420, margins=(20,20,64,20)
     )
+
+
+# ---------- Accidentes por mes ----------
+import plotly.graph_objects as go
+import plotly.express as px
+
+def fig_accidentes_por_mes(df: pd.DataFrame):
+    if df.empty or "mes" not in df.columns:
+        return px.bar(title="Sin datos para el rango seleccionado", template=TEMPLATE)
+
+    # Agregar y ordenar por número de mes
+    tmp = df.groupby("mes").size().reset_index(name="accidentes").sort_values("mes")
+    
+    # Abreviatura de mes (Ene, Feb, Mar, …)
+    MESES_ABREV = ["Ene","Feb","Mar","Abr","May","Jun",
+                   "Jul","Ago","Sep","Oct","Nov","Dic"]
+    tmp["mes_nombre"] = tmp["mes"].apply(lambda m: MESES_ABREV[m-1])
+
+    # Colores: base + acento
+    base   = "#5568FA"
+    accent = "#4202F2"
+    mes_top = tmp.loc[tmp["accidentes"].idxmax(), "mes_nombre"]
+    colores = [accent if m == mes_top else base for m in tmp["mes_nombre"]]
+
+    fig = go.Figure(go.Bar(
+        x=tmp["mes_nombre"],
+        y=tmp["accidentes"],
+        marker=dict(color=colores),
+        text=tmp["accidentes"],
+        texttemplate="%{text:,}",
+        textposition="outside",
+        cliponaxis=False,
+        hovertemplate="<b>%{x}</b><br>Accidentes: %{y:,}<extra></extra>"
+    ))
+
+    # Ejes y estilo → meses abreviados en vertical
+    fig.update_xaxes(
+        categoryorder="array",
+        categoryarray=MESES_ABREV,
+        tickangle=90,          # 👈 vertical
+        ticks="outside"
+    )
+    fig.update_yaxes(
+        title="Accidentes", rangemode="tozero",
+        showgrid=True, gridcolor="#eef2f7", ticks="outside"
+    )
+    fig.update_layout(bargap=0.18, showlegend=False)
+
+    return apply_base_layout(
+        fig,
+        title=" ",
+        height=380, margins=(26, 20, 20, 50)
+    )
+
+
+
+
+# ---------- Barras: fallecidos por alcaldía ----------
+def fig_fallecidos_por_alcaldia(df: pd.DataFrame, min_fallecidos: int = 0):
+    if df.empty or not {"alcaldia","personas_fallecidas"}.issubset(df.columns):
+        return px.bar(title="Sin datos para mostrar", template=TEMPLATE)
+
+    tmp = (df.dropna(subset=["alcaldia","personas_fallecidas"])
+             .groupby("alcaldia")["personas_fallecidas"].sum()
+             .reset_index())
+
+    tmp = tmp[tmp["personas_fallecidas"] >= int(min_fallecidos)]
+    if tmp.empty:
+        fig = px.bar(title="Sin datos con el umbral seleccionado", template=TEMPLATE)
+        return apply_base_layout(fig, title=" ", height=520, margins=(34,18,40,130))
+
+    tmp = tmp.sort_values("personas_fallecidas", ascending=True).reset_index(drop=True)
+
+    # paleta secuencial sobria
+    base = ["#E7EEF6","#CBDCEA","#AFCADF","#93B8D3","#7696B9","#5A78A0","#2F6AA3"]
+    colores = [base[min(i, len(base)-1)] for i in range(len(tmp))]
+
+    fig = go.Figure(go.Bar(
+        y=tmp["alcaldia"], x=tmp["personas_fallecidas"], orientation="h",
+        marker_color=colores, text=tmp["personas_fallecidas"], texttemplate="%{text:,}",
+        textposition="outside", cliponaxis=False,
+        hovertemplate="<b>%{y}</b><br>Fallecidos: %{x:,}<extra></extra>"
+    ))
+
+    fig.update_yaxes(categoryorder="array", categoryarray=list(tmp["alcaldia"]))
+    max_x = int(tmp["personas_fallecidas"].max())
+    fig.update_xaxes(title="Fallecidos", ticks="outside", showgrid=True, gridcolor="#eef2f7",
+                     tick0=0, dtick=10, range=[0, max_x])
+
+    fig.update_layout(uniformtext_minsize=10, uniformtext_mode="hide")
+    return apply_base_layout(fig, title=" ", height=520, margins=(34,18,40,130))
+
+
+# ---------- Distribución por tipo de evento (nueva) ----------
+# --- charts.py ---
+import plotly.graph_objects as go
+import plotly.express as px
+
+import plotly.express as px
+import plotly.graph_objects as go
+
+# Helper para encontrar la columna de "tipo de evento"
+def _col_tipo_evento(df: pd.DataFrame) -> str | None:
+    candidatos = [
+        "tipo_evento", "tipoEvento", "tipo_evento_nombre",
+        "tipo_incidente", "tipo", "evento", "incidente"
+    ]
+    for c in candidatos:
+        if c in df.columns:
+            return c
+    # heurística: alguna columna que contenga "tipo" o "evento"
+    for c in df.columns:
+        cn = c.lower()
+        if ("tipo" in cn and ("evento" in cn or "incidente" in cn)) or cn in {"evento","incidente"}:
+            return c
+    return None
+
+def fig_eventos_por_tipo(df: pd.DataFrame):
+    if df.empty: return px.bar(title="Sin datos para mostrar", template=TEMPLATE)
+
+    col = _col_tipo_evento(df)
+    if not col: return px.bar(title="No se encontró la columna de tipo de evento", template=TEMPLATE)
+
+    tmp = (df[col].fillna("Desconocido").astype(str).str.strip()
+               .value_counts().reset_index())
+    tmp.columns = ["tipo_evento","accidentes"]
+
+    from .theme import COLOR_EVENTOS
+    colores = [COLOR_EVENTOS.get(cat.lower(), COLOR_EVENTOS["desconocido"])
+               for cat in tmp["tipo_evento"]]
+
+    fig = go.Figure(go.Bar(
+        x=tmp["tipo_evento"], y=tmp["accidentes"],
+        marker_color=colores,
+        text=tmp["accidentes"], texttemplate="%{text:,}",
+        textposition="outside", cliponaxis=False,
+        hovertemplate="<b>%{x}</b><br>Accidentes: %{y:,}<extra></extra>"
+    ))
+    fig.update_xaxes(tickangle=12, automargin=True)
+    fig.update_yaxes(title="Accidentes")
+    fig.update_layout(bargap=0.18, showlegend=False)
+    return apply_base_layout(fig, title=" ", height=440, margins=(28,18,40,28))
