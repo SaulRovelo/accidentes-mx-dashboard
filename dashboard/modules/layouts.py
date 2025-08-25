@@ -26,7 +26,7 @@ def card_mapa(df):
     return dbc.Card([
         dbc.CardHeader(html.Div([
             html.H4("Mapa de incidentes"),
-            html.Div("Localización geográfica de los siniestros.", className="subtitle"),
+            html.Div("Distribución espacial de los incidentes.", className="subtitle"),
             get_radio_tipo_evento(df)
         ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
@@ -35,7 +35,7 @@ def card_mapa(df):
                 figure=fig_mapa_incidentes(df),
                 className="plot-container",
                 config={"responsive": True},
-                style={"width": "90%", "maxWidth": "700px", "height": "500px", "margin": "0 auto"}
+                style={"width": "90%", "maxWidth": "700px", "height": "530px", "margin": "0 auto"}
             ),
         ])
     ], className="card-plot", style={"height": "700px"})
@@ -72,7 +72,7 @@ def card_treemap(df, min_acc, max_acc):
 def card_prioridad(df):
     return dbc.Card([
         dbc.CardHeader(html.Div([
-            html.H4("Distribución de prioridad de atención"),
+            html.H4("Prioridad de atención en incidentes viales"),
             html.Div("Proporción de incidentes clasificados en prioridad Alta, Media y Baja.", className="subtitle")
         ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
@@ -97,7 +97,7 @@ def card_hora(df):
     return dbc.Card([
         dbc.CardHeader(html.Div([
             html.H4("Accidentes por hora"),
-            html.Div("Picos en horarios laborales y fines de semana.", className="subtitle")
+            html.Div("Distribución de accidentes en cada hora del día.", className="subtitle")
         ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
             dcc.Graph(
@@ -118,8 +118,8 @@ def card_heatmap(df):
                  for h in range(0, 24, 2)}
     return dbc.Card([
         dbc.CardHeader(html.Div([
-            html.H4("Accidentes por hora y día"),
-            html.Div("Mapa de calor por franja horaria y día de la semana.", className="subtitle"),
+            html.H4("Accidentes por hora y día de la semana"),
+            html.Div("Patrón de calor según franja horaria y día.", className="subtitle"),
             dbc.Row([
                 dbc.Col(dbc.RadioItems(
                     id="radio-dia-scope",
@@ -176,21 +176,27 @@ def card_fallecidos_mes(df):
 def card_les_vs_fall(df):
     return dbc.Card([
         dbc.CardHeader(html.Div([
-            html.H4("Lesionados vs fallecidos (total)"),
-            html.Div("Relación acumulada en el año.", className="subtitle")
+            html.H4("Comparativo de lesionados y fallecidos"),
+            html.Div("Distribución anual de personas lesionadas y fallecidas.", className="subtitle")
         ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
-            dcc.Graph(figure=fig_bubble_lesionados_vs_fallecidos_total(df), className="plot-container")
+            dcc.Graph(
+                figure=fig_bubble_lesionados_vs_fallecidos_total(df),
+                className="plot-container",
+                config={"displayModeBar": False, "responsive": True},
+                style={"height": "460px", "width": "90%", "maxWidth": "720px", "margin": "0 auto"}
+            )
         ])
     ], className="card-plot")
+
 
 
 # --- CARD: Accidentes por mes ---
 def card_mes(df):
     return dbc.Card([
         dbc.CardHeader(html.Div([
-            html.H4("Accidentes por mes"),
-            html.Div("Tendencia mensual de reportes en 2024.", className="subtitle")
+            html.H4("Tendencia mensual de accidentes"),
+            html.Div("Distribución mensual de casos registrados.", className="subtitle")
         ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([
             dcc.Graph(
@@ -222,8 +228,8 @@ def card_fallecidos_alcaldia(df):
     return dbc.Card([
         dbc.CardHeader(html.Div([
             html.H4("Fallecidos por alcaldía"),
-            html.Div("Totales por demarcación.", className="subtitle"),
-            html.Div("Umbral mínimo de fallecidos", className="text-muted small mt-2"),
+            html.Div("Registro acumulado de fallecidos por alcaldía.", className="subtitle"),
+            html.Div("Rango de fallecidos", className="text-muted small mt-2"),
             slider_min_fallecidos(min_val, max_val),
             html.Div(id="lbl-min-fallecidos", className="text-center text-muted small py-1"),
         ]), style={"backgroundColor": "#f8f9fa"}),
@@ -244,8 +250,8 @@ def card_fallecidos_alcaldia(df):
 def card_tipo_evento(df):
     return dbc.Card([
         dbc.CardHeader(html.Div([
-            html.H4("Distribución por tipo de evento"),
-            html.Div("Volumen de reportes por categoría (colores consistentes con el mapa).",
+            html.H4("Accidentes por tipo de evento"),
+            html.Div("Comparación de accidentes según tipo de evento.",
                      className="subtitle")
         ]), style={"backgroundColor": "#f8f9fa"}),
         dbc.CardBody([

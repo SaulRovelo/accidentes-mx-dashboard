@@ -68,7 +68,7 @@ def fig_mapa_incidentes(df: pd.DataFrame):
         "caida de ciclista": "#8ecae6",
     }
     orden_tipos = list(COLOR_EVENTOS.keys())
-    FIG_H = 480  # Altura fija; el ancho lo determina el contenedor (dcc.Graph style={"width":"100%"})
+    FIG_H = 515  # Altura fija; el ancho lo determina el contenedor (dcc.Graph style={"width":"100%"})
 
     # Figura base: siempre color por tipo_evento
     fig = px.scatter_mapbox(
@@ -408,7 +408,7 @@ def fig_prioridad_atencion(df: pd.DataFrame):
 
     return apply_base_layout(
         fig,
-        title="Distribución de prioridad de atención",
+        title=" ",
         #subtitle="Proporción de incidentes clasificados en prioridad Alta, Media y Baja.",
         height=480,
         margins=(24, 24, 64, 24)
@@ -481,30 +481,63 @@ def fig_fallecidos_donut(df: pd.DataFrame):
 
 
 # ---------- Donut: lesionados vs fallecidos (total) ----------
+# ---------- Donut: lesionados vs fallecidos (total) ----------
 def fig_bubble_lesionados_vs_fallecidos_total(df: pd.DataFrame):
+    import plotly.express as px
+
     if df.empty:
         return px.pie(title="Sin datos para mostrar", template=TEMPLATE)
 
+    # Totales
     valores = {
         "Lesionados": int(df["personas_lesionadas"].fillna(0).sum()),
-        "Fallecidos": int(df["personas_fallecidas"].fillna(0).sum())
+        "Fallecidos": int(df["personas_fallecidas"].fillna(0).sum()),
     }
     tmp = pd.DataFrame(list(valores.items()), columns=["categoria", "total"])
+    total = int(tmp["total"].sum())
+
+    # 🎨 Colores definidos
+    color_map = {"Lesionados": "#F4A261", "Fallecidos": "#2A9D8F"}
 
     fig = px.pie(
-        tmp, names="categoria", values="total",
-        hole=0.5, template=TEMPLATE,
+        tmp,
+        names="categoria",
+        values="total",
+        template=TEMPLATE,
+        hole=0.62,
         color="categoria",
-        color_discrete_sequence=[PALETA[0], PALETA[1]]
-    )
-    fig.update_traces(textinfo="label+percent", pull=[0, 0.05])
-    return apply_base_layout(
-        fig,
-        title="Lesionados vs fallecidos (total)",
-        subtitle="Relación acumulada de personas lesionadas y fallecidas en 2024.",
-        height=420, margins=(20,20,64,20)
+        color_discrete_map=color_map,
     )
 
+    # Estilo del donut
+    fig.update_traces(
+        sort=False,
+        textposition="outside",
+        textinfo="label+percent",
+        texttemplate="<b>%{label}</b><br>%{percent} — %{value:,}",
+        marker=dict(line=dict(color="white", width=3)),
+        pull=[0, 0.06],  # énfasis leve en Fallecidos
+        hovertemplate="<b>%{label}</b><br>Total: %{value:,} (%{percent})<extra></extra>",
+        outsidetextfont=dict(size=14)
+    )
+
+    # Total al centro
+    fig.add_annotation(
+        x=0.5, y=0.5, showarrow=False, align="center",
+        text=f"<b>{total:,}</b><br><span style='color:#64748b'>Personas</span>",
+        font=dict(size=16)
+    )
+
+    # Márgenes y sin leyenda
+    fig.update_layout(showlegend=False)
+
+    return apply_base_layout(
+        fig,
+        title="",
+        subtitle=None,
+        height=460,
+        margins=(60, 60, 40, 60)
+    )
 
 # ---------- Accidentes por mes ----------
 import plotly.graph_objects as go

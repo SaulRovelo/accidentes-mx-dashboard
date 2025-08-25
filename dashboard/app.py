@@ -25,9 +25,9 @@ total_fallecidos = int(df["personas_fallecidas"].fillna(0).sum())
 
 # --- Header ---
 header = html.Div([
-    html.H1("Dashboard de Siniestros Viales en CDMX — 2024", className="text-center"),
+    html.H1("Incidentes Viales en la Ciudad de México — 2024", className="text-center"),
     html.P([
-        "Resumen interactivo de incidentes viales reportados en 2024. Fuente: ",
+        "Análisis anual basado en registros oficiales de accidentes y víctimas viales en CDMX. ",
         html.A("Datos Abiertos CDMX", href=DATOS_FUENTE_URL, target="_blank", rel="noopener")
     ], className="text-center text-muted")
 ], className="my-4")
@@ -95,7 +95,7 @@ from modules.filters.fallecidos_filters import umbral_from_pos
 def actualizar_fallecidos_alcaldia(pos):
     umbral = int(umbral_from_pos(pos))              # 0..100 -> umbral real
     fig = fig_fallecidos_por_alcaldia(df, min_fallecidos=umbral)
-    return fig, f"Mostrando alcaldías con ≥ {umbral:,} fallecidos."
+    return fig, f"Mostrando alcaldías con al menos {umbral:,} fallecidos."
 
 
 # --- Main ---
