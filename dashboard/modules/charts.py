@@ -588,9 +588,9 @@ def fig_accidentes_por_mes(df: pd.DataFrame):
     return apply_base_layout(
         fig,
         title=" ",
-        height=800,                   # 👈 un poco más alto
+        height=420,                   # 👈 un poco más alto
                     # 👈 más alto
-        margins=(120, 60, 100, 70)# 👈 márgenes ajustados
+        margins=(80, 60, 100, 70)# 👈 márgenes ajustados
     )
 
 
@@ -617,7 +617,7 @@ def fig_fallecidos_por_alcaldia(df: pd.DataFrame, min_fallecidos: int = 0):
     tmp = base_grp[base_grp["personas_fallecidas"] >= int(min_fallecidos)]
     if tmp.empty:
         fig = px.bar(title="Sin datos con el umbral seleccionado", template=TEMPLATE)
-        return apply_base_layout(fig, title=" ", height=520, margins=(34, 18, 40, 130))
+        return apply_base_layout(fig, title=" ", height=480, margins=(34, 18, 40, 130))
 
     # 3) Orden ascendente para barras horizontales
     tmp = tmp.sort_values("personas_fallecidas", ascending=True).reset_index(drop=True)
@@ -653,7 +653,7 @@ def fig_fallecidos_por_alcaldia(df: pd.DataFrame, min_fallecidos: int = 0):
         ticks="outside",
         showgrid=True, gridcolor="#eef2f7",
         tick0=0, dtick=10,
-        range=[0, max_global]  # rango estable
+        range=[0, max_global + 5]  # rango estable
     )
 
     fig.update_layout(uniformtext_minsize=10, uniformtext_mode="hide")
@@ -718,11 +718,11 @@ def fig_eventos_por_tipo(df: pd.DataFrame):
     ))
 
     # Ejes y estilo (como antes, solo afinado)
-    fig.update_xaxes(tickangle=14, automargin=True, ticks="outside")
+    fig.update_xaxes(tickangle=90, automargin=True, ticks="outside")
     fig.update_yaxes(title="Accidentes", ticks="outside",
                      showgrid=True, gridcolor="#eef2f7")
 
     fig.update_layout(bargap=0.20, showlegend=False,
                       uniformtext_minsize=10, uniformtext_mode="hide")
 
-    return apply_base_layout(fig, title=" ", height=800,  margins=(120, 60, 80, 70))
+    return apply_base_layout(fig, title=" ", height=800,  margins=(80, 60, 110, 70))

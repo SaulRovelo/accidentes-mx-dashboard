@@ -205,7 +205,7 @@ def card_mes(df):
                 config={"displayModeBar": False, "responsive": True},
                 style={
                     "height": "520px",
-                    "width": "90%",      # 👈 hace que no ocupe todo el ancho
+                    "width": "100%",      # 👈 hace que no ocupe todo el ancho
                     "maxWidth": "700px", # 👈 ancho máximo controlado
                     "margin": "0 auto"   # 👈 centra horizontalmente
                 }
@@ -239,7 +239,12 @@ def card_fallecidos_alcaldia(df):
                 figure=fig_fallecidos_por_alcaldia(df, min_val),
                 className="plot-container",
                 config={"displayModeBar": False, "responsive": True},
-                style={"height": "480px"}                # << reduce altura de esta tarjeta
+                style={
+                    "height": "535px",
+                    "width": "100%",
+                    "maxWidth": "700px",
+                    "margin": "0 auto"   # 👈 centrado
+                }               # << reduce altura de esta tarjeta
             )
         ])
     ], className="card-plot card-compact h-100")
@@ -260,8 +265,8 @@ def card_tipo_evento(df):
                 className="plot-container",
                 config={"displayModeBar": False, "responsive": True},
                 style={
-                    "height": "520px",
-                    "width": "90%",
+                    "height": "550px",
+                    "width": "100%",
                     "maxWidth": "700px",
                     "margin": "0 auto"   # 👈 centrado
                 }
