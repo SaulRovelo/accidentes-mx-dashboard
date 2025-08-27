@@ -18,7 +18,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = "Dashboard de Siniestros Viales CDMX — 2024"
 
 # --- Carga de datos ---
-df = load_data("data/accidentes_cdmx_limpio.csv")
+df = load_data("../data/accidentes_cdmx_limpio.csv")
 total_accidentes = len(df)
 total_lesionados = int(df["personas_lesionadas"].fillna(0).sum())
 total_fallecidos = int(df["personas_fallecidas"].fillna(0).sum())
@@ -101,3 +101,6 @@ def actualizar_fallecidos_alcaldia(pos):
 # --- Main ---
 if __name__ == "__main__":
     app.run(debug=True, port=8050)
+
+# usamos para Render / Gunicorn ---
+server = app.server
