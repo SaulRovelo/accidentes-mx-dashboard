@@ -1,39 +1,36 @@
-# 🚦 Dashboard de Accidentes Viales en CDMX — 2024
+# Dashboard de Accidentes Viales en CDMX — 2024
 
-Visualización interactiva y análisis exploratorio de los incidentes de tránsito registrados en la Ciudad de México durante el año 2024.  
+Visualización interactiva y análisis exploratorio de los incidentes de tránsito registrados en la Ciudad de México durante el año 2024.
 Este proyecto permite explorar la información geográfica y temporal de los accidentes, así como sus consecuencias en términos de víctimas, tipos de evento y prioridad de atención.
 
-## 📚 Contenido
+## Contenido
 
-- [🌐 Accede al Dashboard](#-accede-al-dashboard)
-- [🧠 Documentación técnica](#-documentación-técnica)
-- [🖼️ Capturas del Dashboard](#️-capturas-del-dashboard)
-- [📁 Estructura del repositorio](#-estructura-del-repositorio)
-- [⚙️ Tecnologías utilizadas](#️-tecnologías-utilizadas)
-- [🚀 Cómo ejecutarlo localmente](#-cómo-ejecutarlo-localmente)
-- [📜 Licencia y créditos](#-licencia-y-créditos)
+* [Accede al Dashboard](#accede-al-dashboard)
+* [Documentación técnica](#documentación-técnica)
+* [Capturas del Dashboard](#capturas-del-dashboard)
+* [Estructura del repositorio](#estructura-del-repositorio)
+* [Tecnologías utilizadas](#tecnologías-utilizadas)
+* [Cómo ejecutarlo localmente](#cómo-ejecutarlo-localmente)
+* [Licencia y créditos](#licencia-y-créditos)
 
+## Accede al Dashboard
 
-## 🌐 Accede al Dashboard
+**Sitio web del Dashboard**
+https://accidentes-mx-dashboard.onrender.com
 
-**Sitio Web del Dashboard**  
-👉 [https://accidentes-mx-dashboard.onrender.com](https://accidentes-mx-dashboard.onrender.com)
-
-> ⚠️ **Nota:** El dashboard está alojado en [Render.com](https://render.com/) bajo un plan gratuito.  
+> **Nota:** El dashboard está alojado en [Render.com](https://render.com/) bajo un plan gratuito.
 > La carga inicial puede tardar hasta **1 minuto**.
 
+## Documentación técnica
 
-## 🧠 Documentación técnica
+Toda la documentación del desarrollo, incluyendo la estructura del proyecto, las decisiones, los análisis y las tareas, está disponible en el siguiente espacio de Notion:
 
-Toda la documentación del desarrollo (estructura del proyecto, decisiones, análisis y tareas) está disponible en el siguiente espacio de Notion:
+**Notion del proyecto**
+[Ver documentación en Notion](https://www.notion.so/23f668222f9580d9800ac64660d8ab5e?v=23f668222f958135860a000cca701f3f&source=copy_link)
 
-**Notion del proyecto**  
-👉 [Ver documentación en Notion](https://www.notion.so/23f668222f9580d9800ac64660d8ab5e?v=23f668222f958135860a000cca701f3f&source=copy_link)
+## Capturas del Dashboard
 
-
-## 🖼️ Capturas del Dashboard
-
-### 📊 Indicadores clave (KPIs)
+### Indicadores clave (KPIs)
 
 <p align="center">
   <img src="dashboard/assets/kpis.png" alt="Indicadores clave" width="800"/>
@@ -46,8 +43,7 @@ Toda la documentación del desarrollo (estructura del proyecto, decisiones, aná
   </em>
 </p>
 
-
-### 🏙️ Accidentes por alcaldía
+### Accidentes por alcaldía
 
 <p align="center">
   <img src="dashboard/assets/accidentes_alcaldia.png" alt="Accidentes por alcaldía" width="500"/>
@@ -61,7 +57,7 @@ Toda la documentación del desarrollo (estructura del proyecto, decisiones, aná
   </em>
 </p>
 
-### 🗺️ Mapa de incidentes
+### Mapa de incidentes
 
 <p align="center">
   <img src="dashboard/assets/mapa_incidentes.png" alt="Mapa de incidentes" width="450"/>
@@ -74,8 +70,7 @@ Toda la documentación del desarrollo (estructura del proyecto, decisiones, aná
   </em>
 </p>
 
-
-### ⚠️ Prioridad de atención en incidentes
+### Prioridad de atención en incidentes
 
 <p align="center">
   <img src="dashboard/assets/prioridad_atencion.png" alt="Prioridad de atención" width="500"/>
@@ -88,8 +83,7 @@ Toda la documentación del desarrollo (estructura del proyecto, decisiones, aná
   </em>
 </p>
 
-
-### ⏰ Accidentes por hora del día
+### Accidentes por hora del día
 
 <p align="center">
   <img src="dashboard/assets/accidentes_por_hora.png" alt="Accidentes por hora" width="400"/>
@@ -98,26 +92,25 @@ Toda la documentación del desarrollo (estructura del proyecto, decisiones, aná
 <p>
   <em>
   La distribución horaria muestra que los <b>picos de accidentes</b> ocurren principalmente en la mañana, entre las <b>7 y 9 AM</b>, coincidiendo con la hora de mayor movilidad laboral y escolar.  
-  Un segundo repunte se observa hacia la <b>tarde-noche (7 PM)</b>, reflejando también el regreso a casa.  
+  Un segundo repunte se observa hacia la <b>tarde-noche (7 PM)</b>, reflejando también el regreso a casa.
   </em>
 </p>
 
-### 📅 Patrones de accidentes por día y hora
+### Patrones de accidentes por día y hora
 
 <p align="center">
-  <img src="dashboard/assets/heatmap_hora_dia.png" alt="Heatmap accidentes por hora y día" width="450"/>
+  <img src="dashboard/assets/heatmap_hora_dia.png" alt="Heatmap de accidentes por hora y día" width="450"/>
 </p>
 
 <p>
   <em>
   El mapa de calor revela una clara concentración de accidentes durante las <b>mañanas de lunes a viernes (7–9 AM)</b>,  
-  asociado con el inicio de la jornada laboral y escolar.  
+  asociada con el inicio de la jornada laboral y escolar.  
   En contraste, los fines de semana presentan una distribución más dispersa, con menor intensidad en las horas tempranas.
   </em>
 </p>
 
-
-### 🕯️ Fallecidos por mes
+### Fallecidos por mes
 
 <p align="center">
   <img src="dashboard/assets/fallecidos_por_mes.png" alt="Fallecidos por mes" width="550"/>
@@ -131,8 +124,7 @@ Toda la documentación del desarrollo (estructura del proyecto, decisiones, aná
   </em>
 </p>
 
-
-### 📈 Tendencia mensual de accidentes
+### Tendencia mensual de accidentes
 
 <p align="center">
   <img src="dashboard/assets/accidentes_por_mes.png" alt="Accidentes por mes" width="400"/>
@@ -146,8 +138,7 @@ Toda la documentación del desarrollo (estructura del proyecto, decisiones, aná
   </em>
 </p>
 
-
-### 🏘️ Fallecidos por alcaldía
+### Fallecidos por alcaldía
 
 <p align="center">
   <img src="dashboard/assets/fallecidos_por_alcaldia.png" alt="Fallecidos por alcaldía" width="350"/>
@@ -161,7 +152,7 @@ Toda la documentación del desarrollo (estructura del proyecto, decisiones, aná
   </em>
 </p>
 
-### 🔎 Accidentes por tipo de evento
+### Accidentes por tipo de evento
 
 <p align="center">
   <img src="dashboard/assets/accidentes_por_tipo.png" alt="Accidentes por tipo de evento" width="350"/>
@@ -171,15 +162,14 @@ Toda la documentación del desarrollo (estructura del proyecto, decisiones, aná
   <em>
   La mayoría de los incidentes viales corresponden a <b>choques</b>, con una diferencia muy marcada frente al resto de categorías.  
   Los <b>derrapes</b> y <b>atropellamientos</b> aparecen en un segundo nivel de frecuencia,  
-  mientras que <b>volcaduras</b> y <b>caídas de pasajero o ciclista</b> son los eventos menos comunes.
+  mientras que las <b>volcaduras</b> y las <b>caídas de pasajero o ciclista</b> son los eventos menos comunes.
   </em>
 </p>
 
-
-### 🩹 Comparativo de lesionados y fallecidos
+### Comparativo de lesionados y fallecidos
 
 <p align="center">
-  <img src="dashboard/assets/lesionados_vs_fallecidos.png" alt="Lesionados vs fallecidos" width="450"/>
+  <img src="dashboard/assets/lesionados_vs_fallecidos.png" alt="Lesionados frente a fallecidos" width="450"/>
 </p>
 
 <p>
@@ -190,61 +180,58 @@ Toda la documentación del desarrollo (estructura del proyecto, decisiones, aná
   </em>
 </p>
 
-
-
-
-## 📁 Estructura del repositorio
+## Estructura del repositorio
 
 ```text
 accidentes-mx-dashboard/
 ├── dashboard/
-│   ├── assets/                 # Imágenes y recursos visuales usados en el dashboard
-│   ├── modules/                # Módulos reutilizables: layouts, filtros, gráficas, etc.
-│   └── app.py                  # Archivo principal de la app en Dash
+│   ├── assets/                         # Imágenes y recursos visuales del dashboard
+│   ├── modules/                        # Módulos reutilizables: layouts, filtros y gráficas
+│   └── app.py                          # Archivo principal de la aplicación en Dash
 │
 ├── data/
-│   ├── accidentes_cdmx.csv     # Dataset original crudo
-│   └── accidentes_cdmx_limpio.csv # Dataset limpio listo para análisis
+│   ├── accidentes_cdmx.csv             # Dataset original
+│   └── accidentes_cdmx_limpio.csv      # Dataset limpio y preparado para el análisis
 │
 ├── notebooks/
-│   ├── 01_exploracion_inicial.ipynb          # Exploración básica del dataset
-│   ├── 02_limpieza_transformacion.ipynb      # Limpieza y creación del dataset final
-│   ├── 03_analisis_exploratorio.ipynb        # Análisis detallado y pruebas de visualización
-│   └── app_v1_prototipo.py     # Primer versión de prototipo antes de modularizar
-│   └── app.py                  # Archivo principal de la app 
+│   ├── 01_exploracion_inicial.ipynb    # Exploración básica del dataset
+│   ├── 02_limpieza_transformacion.ipynb
+│   ├── 03_analisis_exploratorio.ipynb  # Análisis y pruebas de visualización
+│   ├── app_v1_prototipo.py             # Primera versión antes de modularizar
+│   └── app.py                          # Versión de la aplicación en notebooks
 │
-├── requirements.txt            # Lista de dependencias necesarias para correr la app
-├── README.md                   # Documentación del proyecto 
-├── .gitignore                  # Archivos/carpetas ignoradas por Git
-└── venv/                       # Entorno virtual local (no se sube a GitHub)
+├── requirements.txt                    # Dependencias necesarias para ejecutar la aplicación
+├── README.md                           # Documentación principal del proyecto
+├── .gitignore                          # Archivos y carpetas ignorados por Git
+└── venv/                               # Entorno virtual local, no incluido en GitHub
 ```
 
-## ⚙️ Tecnologías utilizadas
+## Tecnologías utilizadas
 
 Este proyecto se desarrolló principalmente en **Python 3.13.6**, utilizando las siguientes librerías y frameworks:
 
-- **Dash 3.2.0** → Framework principal para la creación del dashboard.  
-- **Plotly 6.3.0** → Gráficos interactivos y visualizaciones dinámicas.  
-- **Dash Bootstrap Components 2.0.3** → Componentes de interfaz y diseño responsivo.  
-- **Pandas 2.3.1** + **NumPy 2.3.2** → Manipulación y análisis de datos.  
-- **Flask 3.1.1** → Servidor web base utilizado por Dash.  
-- **Gunicorn 21.2.0** → Servidor WSGI para despliegue en producción (Render).  
+* **Dash 3.2.0** - Framework principal para la creación del dashboard.
+* **Plotly 6.3.0** - Gráficos interactivos y visualizaciones dinámicas.
+* **Dash Bootstrap Components 2.0.3** - Componentes de interfaz y diseño responsivo.
+* **Pandas 2.3.1** y **NumPy 2.3.2** - Manipulación y análisis de datos.
+* **Flask 3.1.1** - Servidor web base utilizado por Dash.
+* **Gunicorn 21.2.0** - Servidor WSGI utilizado para el despliegue en producción mediante Render.
 
-📌 Además, en etapas exploratorias también se usó **Streamlit 1.38.0** y **Altair 5.5.0** en notebooks de análisis.
+Además, durante las etapas exploratorias también se utilizaron **Streamlit 1.38.0** y **Altair 5.5.0** en los notebooks de análisis.
 
-
-
-## 🚀 Cómo ejecutarlo localmente
+## Cómo ejecutarlo localmente
 
 ### 1. Clonar el repositorio
 
-Abre tu terminal y ejecuta:
+Abre una terminal y ejecuta:
+
 ```bash
 git clone git@github.com:SaulRovelo/accidentes-mx-dashboard.git
 cd accidentes-mx-dashboard
 ```
 
-### 2. Crear un entorno virtual e instalar dependencias
+### 2. Crear un entorno virtual e instalar las dependencias
+
 ```bash
 # Linux / macOS
 python -m venv venv
@@ -254,27 +241,27 @@ source venv/bin/activate
 python -m venv venv
 venv\Scripts\activate
 
-# Instalar dependencias
+# Instalar las dependencias
 pip install -r requirements.txt
 ```
 
 ### 3. Ejecutar la aplicación
-  ```bash
+
+```bash
 python dashboard/app.py
 ```
 
-### 4. Abrir en el navegador
+### 4. Abrir la aplicación en el navegador
 
-Una vez que la aplicación esté corriendo, abre tu navegador y visita:
-[http://localhost:8050](http://localhost:8050)
+Una vez que la aplicación esté en ejecución, abre tu navegador y visita:
 
+http://localhost:8050
 
-## 📜 Licencia y créditos
+## Licencia y créditos
 
-Este proyecto fue desarrollado con fines **educativos y de portafolio profesional**.  
+Este proyecto fue desarrollado con fines **educativos y de portafolio profesional**.
 El dataset base proviene del portal oficial de [Datos Abiertos de la Ciudad de México](https://datos.cdmx.gob.mx/).
 
 ---
 
-💻 Desarrollado  por [SaulRovelo](https://github.com/SaulRovelo)  
-
+Desarrollado por [SaulRovelo](https://github.com/SaulRovelo)
